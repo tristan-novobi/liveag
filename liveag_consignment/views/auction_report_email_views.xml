@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_auction_report_email_tree" model="ir.ui.view">
+        <field name="name">auction.report.email.tree</field>
+        <field name="model">auction.report.email</field>
+        <field name="arch" type="xml">
+            <list string="Auction Emails">
+                <field name="create_date"/>
+                <field name="auction_id"/>
+                <field name="partner_id"/>
+                <field name="report_type"/>
+                <field name="email_to"/>
+                <field name="state" widget="badge"/>
+                <field name="sent_at"/>
+                <field name="mail_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_auction_report_email_form" model="ir.ui.view">
+        <field name="name">auction.report.email.form</field>
+        <field name="model">auction.report.email</field>
+        <field name="arch" type="xml">
+            <form string="Auction Report Email">
+                <header>
+                    <button name="action_send_single" type="object" string="Send Now" class="btn-primary" invisible="state == 'sent'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,failed,no_email"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="auction_id"/>
+                            <field name="partner_id"/>
+                            <field name="email_to"/>
+                        </group>
+                        <group>
+                            <field name="report_type"/>
+                            <field name="sent_at" readonly="1"/>
+                            <field name="mail_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Logs">
+                        <field name="error_message" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_auction_report_email" model="ir.actions.act_window">
+        <field name="name">Auction Emails</field>
+        <field name="res_model">auction.report.email</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+        <field name="domain">[]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No email records. Use Send Emails on Auction to create them.
+            </p>
+        </field>
+    </record>
+</odoo>

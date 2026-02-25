@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_auction_view_form_inherit" model="ir.ui.view">
+        <field name="name">sale.auction.form.inherit</field>
+        <field name="model">sale.auction</field>
+        <field name="inherit_id" ref="liveag_consignment.sale_auction_view_form"/>
+        <field name="arch" type="xml">
+            <field name="head_sold" position="after">
+                <field name="date_for_next_notification" invisible="not schedule_notifications"/>
+                <field name="schedule_notifications"/>
+            </field>
+        </field>
+    </record>
+</odoo>

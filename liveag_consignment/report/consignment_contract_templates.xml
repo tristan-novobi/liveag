@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <template id="liveag_header">
+        <t t-param="contract"/>
+        <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)"/>
+        <table style="width: 100%; margin-bottom: 10px; border: 0 solid transparent;">
+            <tr>
+                <td style="width: 30%; vertical-align: top;">
+                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo" style="height:60px;"/>
+                </td>
+                <td style="width: 40%; text-align: center;">
+                    <h2 style="font-size: 18px; margin: 0;">
+                        Lot # <t t-esc="contract.lot_number"/>
+                    </h2>
+                </td>
+                <td style="width: 30%; vertical-align: top; text-align: right;">
+                    <p style="margin: 0; font-size: 12px; font-weight: 700;">
+                        <t t-esc="company.street"/>
+                        <t t-if="company.street2">, <t t-esc="company.street2"/></t><br/>
+                        <t t-esc="company.city"/>, 
+                        <t t-esc="company.state_id.name"/>
+                        <t t-esc="company.zip"/><br/>
+                        <t t-esc="contract.format_phone(company.phone)"/><br/>
+                        CN <t t-esc="'%05d' % contract.id"/>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="contract_table">
+        <p style="text-align: center; font-size: 12px; font-weight: 700; margin: 5px 0;">
+            Seller agrees to sell, and Buyer agrees to purchase, the following described livestock (the livestock) for the consideration
+            set forth on this order form and the <span style="font-weight: 700;">MASTER AGREEMENTS</span>
+        </p>
+        <div style="border: 2px solid #497336; border-radius: 6px;">
+            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent; font-size: 12px;">
+                <thead style="background-color: #497336;">
+                    <tr style="color: white; font-weight: 700;">
+                        <th style="width: 0.6in; text-align: center; padding: 6px 0;">Head</th>
+                        <th style="width: 2in; text-align: center; padding: 6px 0;">Kind / Sex</th>
+                        <th style="width: 1in; text-align: center; padding: 6px 0;">Base Weight</th>
+                        <th style="width: 0.85in; text-align: center; padding: 6px 0;">Price</th>
+                    </tr>
+                </thead>
+                <tbody style="overflow: hidden;">
+                    <tr>
+                        <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(contract.head1)"/></td>
+                        <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="contract.kind1.name"/></td>
+                        <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(contract.weight1)"/></td>
+                        <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;">$<t t-esc="'{:,.2f}'.format(contract.sold_price)"/></td>
+                    </tr>
+                    <t t-if="contract.kind2 and contract.weight2">
+                        <tr style="border-top: 1px solid #497336;">
+                            <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(contract.head2)"/></td>
+                            <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="contract.kind2.name"/></td>
+                            <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(contract.weight2)"/></td>
+                            <td style="text-align: center; border-right: 1px solid #497336; padding: 5px 0;">$<t t-esc="'{:,.2f}'.format(contract.sold_price - contract.price_back)"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <template id="contract_buyer_seller">
+        <t t-param="contract"/>
+        <p style="text-align: center; font-size: 12px; font-weight: 700; margin: 5px 0;">
+            This order form is made and entered on this date of 
+            <span style="text-decoration:underline;">
+                <t t-if="contract.is_special_sale_type">
+                    <t t-esc="contract.sold_date.strftime('%B %d, %Y')" t-if="contract.sold_date"/>
+                </t>
+                <t t-else="">
+                    <t t-if="contract.auction_id.sale_date_begin">
+                        <t t-esc="(contract.auction_id.sale_date_begin - datetime.timedelta(hours=6)).strftime('%B %d, %Y')"/>
+                    </t>
+                    <t t-else="">
+                        <span style="margin: 0 10px; 0 5px;">
+                            __________
+                        </span>
+                    </t>
+                </t>
+            </span> between LiveAg and:
+        </p>
+        <table style="margin: 0 auto; font-size: 12px; border-spacing: 10px; table-layout: auto; border: 0 solid transparent;">
+            <tr>
+                <td style="vertical-align: top; text-align: left;">
+                    <t t-esc="contract.seller_id.name"/><br/>
+                    <t t-esc="contract.seller_id.street"/>, 
+                    <t t-esc="contract.seller_id.street2"/><br/>
+                    <t t-esc="contract.seller_id.city"/>, 
+                    <t t-esc="contract.seller_id.state_id.code"/>
+                    <t t-esc="contract.seller_id.zip"/><br/>
+                    <t t-if="contract.seller_id.phone">
+                        Phone: <t t-esc="contract.format_phone(contract.seller_id.phone)"/><br/>
+                    </t>
+                    <!-- <t t-elif="contract.seller_id.mobile">
+                        Cell: <t t-esc="contract.format_phone(contract.seller_id.mobile)"/><br/>
+                    </t> -->
+                    Email: <t t-esc="contract.seller_id.email"/><br/>
+                </td>
+
+                <td style="text-align: center; vertical-align: middle; padding: 0 20px;">
+                    <p style="font-weight: 700;">AND</p>
+                </td>
+
+                <td style="vertical-align: top; text-align: left;">
+                    <t t-esc="contract.buyer_id.name"/><br/>
+                    <t t-esc="contract.buyer_id.street"/>, 
+                    <t t-esc="contract.buyer_id.street2"/><br/>
+                    <t t-esc="contract.buyer_id.city"/>, 
+                    <t t-esc="contract.buyer_id.state_id.code"/>
+                    <t t-esc="contract.buyer_id.zip"/><br/>
+                    <t t-if="contract.buyer_id.phone">
+                        Phone: <t t-esc="contract.format_phone(contract.buyer_id.phone)"/><br/>
+                    </t>
+                    <!-- <t t-elif="contract.buyer_id.mobile">
+                        Cell: <t t-esc="contract.format_phone(contract.buyer_id.mobile)"/><br/>
+                    </t> -->
+                    Email: <t t-esc="contract.buyer_id.email"/><br/>
+                </td>
+            </tr>
+            <tr>
+                <td><p style="font-weight:800; margin: 5px 12px; font-size: 12px;white-space: nowrap;">hereinafter known as SELLER</p></td>
+                <td></td>
+                <td><p style="font-weight:800; margin: 5px 12px; font-size: 12px;white-space: nowrap;">hereinafter known as BUYER</p></td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="contract_full_detail">
+        <t t-param="contract"/>
+        <div style="margin-top: 10px; font-size: 12px; line-height: 1.4;">
+            <p style="margin: 0;">
+                <span style="font-weight:700">Heifer Price Back:</span>
+                <t t-if="contract.price_back" t-esc="contract.price_back" t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/>
+                <t t-else="">N/A</t>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Breed Type:</span>
+                <t t-esc="contract.breed_type"/>
+            </p>
+            <div>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top;">
+                    <span style="font-weight: 700;">Origin:</span>
+                    <span style="min-width: 60px; display: inline-block; text-align: center; white-space: nowrap;">
+                        <t t-esc="contract.origin_full_description"/>
+                    </span>
+                </span>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top; white-space: nowrap;">
+                    <span style="font-weight: 700;">Country of Origin:</span>
+                    <span style="min-width: 40px; display: inline-block; text-align: center; white-space: nowrap;">
+                        <t t-esc="contract.country_id.code"/>
+                    </span>
+                </span>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top;">
+                    <span style="font-weight: 700;">Frame:</span>
+                    <span style="min-width: 60px; display: inline-block; text-align: center;">
+                        <t t-esc="contract.frame_size.name"/>
+                    </span>
+                </span>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top;">
+                    <span style="font-weight: 700;">Flesh:</span>
+                    <span style="min-width: 60px; display: inline-block; text-align: center;">
+                        <t t-esc="contract.flesh_type.name"/>
+                    </span>
+                </span>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top;">
+                    <span style="font-weight: 700;">Horns:</span>
+                    <span style="min-width: 60px; display: inline-block; text-align: center;">
+                        <t t-esc="contract.horns.name"/>
+                    </span>
+                </span>
+                <span style="display: inline-block; margin-right: 10px; vertical-align: top;">
+                    <span style="font-weight: 700;">Est Weight Variance:</span>
+                    <span style="min-width: 60px; display: inline-block; text-align: center;">
+                        <t t-esc="contract.weight_variance.name"/>
+                    </span>
+                </span>
+            </div>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Feeding Program:</span>
+                <t t-esc="contract.feeding_program"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Current Location:</span>
+                <t t-esc="contract.get_location_description()"/>
+            </p>
+            <p style="font-size:10px;margin:0 auto;">(Where the livestock shall remain and be handled In their normal and usual manner until delivery, unless otherwise expressly agreed in writing.)</p>
+            <p style="font-size:12px;font-weight:800;margin:5px auto;text-align: center;">Delivery Maturity Date of Livestock Forward Contract: Seller shall deliver Livestock to the Buyer F.O.B. On/Between
+                <t t-esc="contract.delivery_date_range" />
+                at the
+                <t t-esc="contract.whose_option.name"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Weighing Conditions:</span>
+                <t t-esc="contract.weighing_cond_w_freight"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Slide:</span>
+                <t t-esc="contract._compute_slide_description()"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Comments:</span>
+                <t t-esc="contract.full_comments"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Vaccinations:</span>
+                <t t-esc="contract.full_vaccination_desc"/>
+            </p>
+            <p style="margin: 0;">
+                <span style="font-weight:700">Bangs Vaccinated:</span>
+                <t t-esc="contract.bangs_vaccinated.name"/>
+            </p>
+            <div>
+                <t t-if="contract.bqa_certified">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">BQA Certified:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.bqa_certified">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.beef_care">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">BEEF CARE:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.beef_care">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.nhtc">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">NHTC:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.nhtc">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.gap_program">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Gap:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 50px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-esc="contract.gap_program.name"/>
+                            <t t-if="not contract.gap_program.name">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.source_age_program">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Source/Age Verified:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 140px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-esc="contract.source_age_program.name"/>
+                            <t t-if="not contract.source_age_program.name">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.verified_natural">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Verified Natural:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.verified_natural">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.natural">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Natural:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.natural">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.pi_free">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">PI Free:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.pi_free">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.tag_840">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">840 Tag:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.tag_840">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.verified_grassfed">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Verified Grassfed:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.verified_grassfed">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.non_gmo">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Non-GMO:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.non_gmo">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <t t-if="contract.organic">
+                    <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                        <span style="font-weight: 700;">Organic:</span>
+                        <span style="border-bottom: 1px solid black; min-width: 20px; display: inline-block; text-align: center; height: 16px;">
+                            <t t-if="contract.organic">X</t>
+                            <t t-else="">&#160;</t>
+                        </span>
+                    </span>
+                </t>
+
+                <span style="display: inline-block; margin-right: 5px; vertical-align: top; white-space: nowrap;">
+                    <span style="font-weight: 700;">Implanted:</span>
+                    <span style="border-bottom: 1px solid black; min-width: 100px; display: inline-block; text-align: center; height: 16px; white-space: nowrap;">
+                        <t style="white-space: nowrap;" t-esc="contract.implanted_type.name"/>
+                        <t t-if="not contract.implanted_type.name">&#160;</t>
+                    </span>
+                </span>
+
+                <span style="display: inline-block; margin-right: 5px; vertical-align: top;">
+                    <span style="font-weight: 700;">Date:</span>
+                    <span style="border-bottom: 1px solid black; min-width: 80px; display: inline-block; text-align: center; height: 16px;">
+                        <t t-if="contract.implanted_month and contract.implanted_year">
+                            <t t-esc="dict(contract._fields['implanted_month'].selection).get(contract.implanted_month)"/>, <t t-esc="contract.implanted_year"/>
+                        </t>
+                        <t t-elif="contract.implanted_date">
+                            <t t-esc="contract['implanted_date'].strftime('%m/%d/%Y')"/>
+                        </t>
+                        <t t-else="">&#160;</t>
+                    </span>
+                </span>
+            </div>
+        </div>
+    </template>
+
+    <template id="contract_addendum">
+        <div style="padding: 10px 0; width: 100%;">
+            <table style="font-size: 12px; width: 100%; border-collapse: collapse; border: 2px solid #e3e3e3; border-radius: 6px; overflow: hidden; text-align: center;">
+                <thead>
+                    <tr style="background-color: #e3e3e3; font-weight: 700;">
+                        <th style="padding: 6px; width: 25%; border: 1px solid #e3e3e3; vertical-align: middle;">Addendum Seller</th>
+                        <th style="padding: 6px; width: 25%; border: 1px solid #e3e3e3; vertical-align: middle;">Address</th>
+                        <th style="padding: 6px; width: 25%; border: 1px solid #e3e3e3; vertical-align: middle;">Lienholder</th>
+                        <th style="padding: 6px; width: 4%; border: 1px solid #e3e3e3; vertical-align: middle;">%</th>
+                        <th style="padding: 6px; width: 6%; border: 1px solid #e3e3e3; vertical-align: middle;">Head</th>
+                        <th style="padding: 6px; width: 15%; border: 1px solid #e3e3e3; vertical-align: middle;">Part Payment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="contract.addendum_ids" t-as="addendum">
+                        <tr>
+                            <td style="text-align: center; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span><t t-esc="addendum.seller_id.name"/></span>
+                            </td>
+                            <td style="text-align: left; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span><t t-esc="addendum.seller_address"/></span>
+                            </td>
+                            <td style="text-align: right; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span><t t-esc="addendum.lien_holder_id.name"/></span>
+                            </td>
+                            <td style="text-align: right; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span><t t-esc="addendum.percentage"/></span>
+                            </td>
+                            <td style="text-align: right; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span><t t-esc="addendum.head_count"/></span>
+                            </td>
+                            <td style="text-align: right; padding: 3px 10px 2px 10px; vertical-align: middle;">
+                                <span>$<t t-esc="'{:,.2f}'.format(addendum.part_payment)"/></span>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <template id="contract_addendum_2">
+        <t t-param="contract"/>
+        <t t-if="len(contract.addendum_ids) > 0">
+            <table style="width: 100%; table-layout: fixed; text-align: center; margin: 10px auto; border-collapse: collapse; font-size: 12px;">
+                <tbody>
+                    <tr style="height: 24px; font-size: 12px;">
+                        <th style="width: 25%; border: 1px solid black;">Addendum Seller</th>
+                        <th style="width: 25%; border: 1px solid black;">Address</th>
+                        <th style="width: 25%; border: 1px solid black;">Lienholder</th>
+                        <th style="width: 4%; border: 1px solid black;">%</th>
+                        <th style="width: 6%; border: 1px solid black;">Head</th>
+                        <th style="width: 15%; border: 1px solid black;">Part Payment - $30/Head</th>
+                    </tr>
+                    <tbody>
+                        <t t-set="addendum" t-value="contract.addendum_ids"/>
+                        <tr t-foreach="addendum" t-as="add">
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.seller_id.name"/></span>
+                            </td>
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.seller_id.contact_address_inline_clean"/></span>
+                            </td>
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.lien_holder_id.name"/></span>
+                            </td>
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.percentage"/></span>
+                            </td>
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.head_count"/></span>
+                            </td>
+                            <td style="border: 1px solid black;">
+                                <span><t t-esc="add.part_payment" t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tr style="height: 16px;">
+                        <td colspan="2"></td>
+                        <td colspan="2" style="border: 1px solid black;font-size: 10px;font-weight:800;">Total Seller Part Payment:</td>
+                        <td colspan="2" style="border: 1px solid black;">
+                            <span><t t-esc="contract.seller_part_payment" t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </t>
+    </template>
+
+    <template id="contract_buyer_invoiced">
+        <t t-param="contract"/>
+        <table style="width: 100%; font-size: 12px; border: 0 solid transparent;">
+            <tr>
+                <td style="vertical-align: top; width: 50%;">
+                    <p style="font-weight: 800; margin: 0;">Represented by:</p>
+                    <t t-foreach="contract.rep_ids" t-as="rep">
+                        <p style="margin: 5px 0;">
+                            <span style="font-weight: 600;"><t t-esc="rep.rep_id.name"/></span>
+                            <t t-if="rep.rep_id.phone"> - <t t-esc="contract.format_phone(rep.rep_id.phone)"/></t>
+                            <!-- <t t-elif="rep.rep_id.mobile"> - <t t-esc="contract.format_phone(rep.rep_id.mobile)"/></t> -->
+                        </p>
+                    </t>
+                </td>
+                <td style="vertical-align: top; width: 50%;">
+                    <p style="font-weight: 800; margin: 0;">Buyer Invoiced:</p>
+                    <p style="margin: 5px 0;">
+                        <t t-esc="contract.buyer_id.name"/>
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <span>
+                            <t t-esc="contract.buyer_part_payment" t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/>
+                            <t t-if="contract.immediate_delivery"> - <strong>Immediate Delivery</strong></t>
+                        </span>
+                    </p>
+                </td>
+            </tr>
+        </table>
+        
+    </template>
+
+    <template id="report_consignment_seller_contract">
+        <t t-foreach="docs" t-as="contract">
+            <main class="page">
+                <div class="article" style="font-family: Arial, sans-serif; margin: 0 20px;" t-att-data-oe-model="'consignment.contract'" t-att-data-oe-id="contract.id">
+                    <t t-call="liveag_consignment.liveag_header">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_buyer_seller">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_table">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_full_detail">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_addendum">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_buyer_invoiced">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+                </div>
+            </main>
+        </t>
+    </template>
+
+    <template id="report_consignment_buyer_contract">
+        <t t-foreach="docs" t-as="contract">
+            <main class="page">
+                <div class="article" style="font-family: Arial, sans-serif; margin: 0 20px;" t-att-data-oe-model="'consignment.contract'" t-att-data-oe-id="contract.id">
+                    <t t-call="liveag_consignment.liveag_header">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_buyer_seller">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_table">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_full_detail">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+
+                    <t t-call="liveag_consignment.contract_buyer_invoiced">
+                        <t t-set="contract" t-value="contract"/>
+                    </t>
+                </div>
+            </main>
+        </t>
+    </template>
+</odoo>

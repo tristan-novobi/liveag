@@ -1,0 +1,658 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="buyer_invoice_report">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+            <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+            <t t-as="delivery" t-foreach="docs">
+                <main class="page" style="width: 8.5in; height: 11in; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative;">
+                    <div class="article" style="position: relative; height: 100%; width: 100%; font-family: Arial, sans-serif; color: #3D3D3D; font-size: 15px; padding-bottom: 80px;" t-att-data-oe-id="delivery.id"
+                    t-att-data-oe-model="'consignment.delivery'">
+                        <!-- Header -->
+                        <t t-call="liveag_consignment.delivery_header">
+                            <t t-set="item1_label" t-value="'Lot #'"/>
+                            <t t-set="item1_value" t-value="delivery.lot_number"/>
+                            <t t-set="item2_label" t-value="'Buyer #'"/>
+                            <t t-set="item2_value" t-value="delivery.contract_id.buyer_number.name or (delivery.buyer_id.buyer_number_ids[-1].name if delivery.buyer_id.buyer_number_ids else '')"/>
+                        </t>
+
+                        <t t-call="liveag_consignment.buyer_seller_header"/>
+                        <t t-call="liveag_consignment.contract_variables"/>
+                        <t t-call="liveag_consignment.delivery_table"/>
+                        <t t-call="liveag_consignment.buyer_invoice_info"/> 
+
+                        <!-- Footer -->
+                        <t t-call="liveag_consignment.delivery_footer"/>
+                    </div>
+                </main>
+            </t>
+        </t>
+    </template>
+
+    <template id="delivery_sheet_report">
+        <t t-call="web.html_container">
+            <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+            <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+            <t t-as="delivery" t-foreach="docs">
+                <main class="page" style="width: 8.5in; height: 11in; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); position: relative;">
+                    <div class="article" style="position: relative; height: 100%; width: 100%; font-family: Poppins, sans-serif; color: #3D3D3D; font-size: 15px; padding-bottom: 80px;" t-att-data-oe-id="delivery.id"
+                    t-att-data-oe-model="'consignment.delivery'">
+                        <!-- Header -->
+                        <t t-call="liveag_consignment.delivery_header">
+                            <t t-set="item1_label" t-value="'Lot #'"/>
+                            <t t-set="item1_value" t-value="delivery.lot_number"/>
+                            <t t-set="item2_label" t-value="'Seller'"/>
+                            <t t-set="item2_value" t-value="delivery.seller_id.name if delivery.seller_id else ''"/>
+                        </t>
+
+                        <!-- <t t-call="liveag_consignment.buyer_seller_header"/> -->
+                        <t t-call="liveag_consignment.contract_variables"/>
+                        <t t-call="liveag_consignment.delivery_table"/>
+                        <t t-call="liveag_consignment.seller_deductions"/>
+                        <t t-call="liveag_consignment.seller_checks"/>
+                        <t t-call="liveag_consignment.delivery_sheet_buyer_info"/> 
+
+                        <!-- Footer -->
+                        <!-- <t t-call="liveag_consignment.delivery_footer"/> -->
+                    </div>
+                </main>
+            </t>
+        </t>
+    </template>
+
+    <template id="delivery_header">
+        <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+        <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+        <table style="width: 100%; margin-bottom: 10px; border: 0 solid transparent;">
+            <tr>
+                <td style="width: 20%; vertical-align: top;">
+                    <img alt="Logo" style="height:40px;" t-att-src="image_data_uri(company.logo)"
+                    t-if="company.logo" />
+                </td>
+                <td style="width: 60%; text-align: center;">
+                    <table style="margin: 0 10px; width: 100%; border: 0 solid transparent;">
+                        <tr>
+                            <td style="text-align: right; font-weight: 700; padding: 2px 0;">
+                                <t t-esc="item1_label" />
+                            </td>
+                            <td style="text-align: left; padding: 2px 0 2px 5px; font-weight: 700;">
+                                <t t-esc="item1_value" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right; font-weight: 700; padding: 2px 0;">
+                                <t t-esc="item2_label" />
+                            </td>
+                            <td style="text-align: left; padding: 2px 0 2px 5px;">
+                                <t t-esc="item2_value" />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width: 20%; vertical-align: top; text-align: right;">
+                    <p style="margin: 0; font-weight: 700; line-height: 1.1;">
+                        <t style="margin: 0;" t-esc="company.street" />
+                        <t t-if="company.street2">,
+                            <t style="margin: 0;" t-esc="company.street2" />
+                        </t><br />
+                        <t style="margin: 0;" t-esc="company.city" />,
+                        <t style="margin: 0;" t-esc="company.state_id.name" />
+                        <t style="margin: 0;" t-esc="company.zip" /><br />
+                        <t style="margin: 0;" t-esc="format_phone(company.phone)" /><br />
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="buyer_seller_header">
+        <table style="width: 100%; padding: 10px 0; border: 0 solid transparent;">
+            <tr>
+                <td style="width: 50%; vertical-align: top;">
+                    <table style="width: fit-content; border: 0 solid transparent;">
+                        <tr>
+                            <td style="font-weight: 700; padding: 2px 0;">
+                                Buyer:
+                            </td>
+                            <td style="padding: 2px 0 2px 5px;">
+                                <t t-esc="delivery.buyer_id.name" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700; padding: 2px 0;">
+                                Cell:
+                            </td>
+                            <td style="padding: 2px 0 2px 5px;">
+                                <t t-esc="format_phone(delivery.buyer_id.phone)" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight: 700; padding: 2px 0;">
+                                Email:
+                            </td>
+                            <td style="padding: 2px 0 2px 5px;">
+                                <t t-esc="delivery.buyer_id.email" />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                    <table style="width: fit-content; margin-bottom: 10px; border: 0 solid transparent; margin-left: auto;">
+                        <tr>
+                            <td style="font-weight: 700; text-align: right; padding: 2px 0;">
+                                Seller:
+                            </td>
+                            <td style="padding: 2px 0 2px 5px; white-space: nowrap;">
+                                <t t-esc="delivery.seller_id.name" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style=" font-weight: 700; text-align: right; padding: 2px 0;">
+                                Location:
+                            </td>
+                            <td style="padding: 2px 0 2px 5px; white-space: nowrap;">
+                                <t t-esc="delivery.contract_id.nearest_town" />, <t t-esc="delivery.contract_id.state_of_nearest_town.code" />
+                            </td>
+                        </tr>
+                        <tr style="vertical-align: top;">
+                            <td style="font-weight: 700; text-align: right; padding: 2px 0;">
+                                Rep(s):
+                            </td>
+                            <td style="padding: 2px 0 2px 5px; white-space: nowrap;">
+                                <table style="width: 100%; border: 0 solid transparent;">
+                                    <t t-foreach="delivery.rep_ids" t-as="rep">
+                                        <tr>
+                                        <td>
+                                            <t t-esc="rep.rep_id.name" />
+                                        </td>
+                                        </tr>
+                                    </t>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </template>
+
+    <template id="contract_variables">
+        <div style="padding: 10px 0;">
+            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <tr>
+                    <td style="text-align: left;">
+                        <strong>Delivery Date:</strong>
+                        <t t-esc="delivery.delivery_date" t-options='{"widget": "date", "format": "M/d/yyyy"}' />
+                    </td>
+                    <td style="text-align: right;">
+                        <strong>Auction Date:</strong>
+                        <t t-esc="delivery.contract_id.sold_date" t-options='{"widget": "date", "format": "M/d/yyyy"}' />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div style="padding: 5px 0 10px 0;">
+            <table style="width: 100%;border: 0 solid transparent;">
+                <tr>
+                    <td style="width: 33%; vertical-align: top; text-align: center;">
+                        <div style="padding: 15px; background-color: #E3E3E3; border-radius: 6px; width: 90%; margin: 0 auto;">
+                        <strong>Weight Stop:</strong> <t t-esc="delivery.weight_stop_id.name"/>
+                        </div>
+                    </td>
+                    <td style="width: 33%; vertical-align: top; text-align: center;">
+                        <div style="padding: 15px; background-color: #E3E3E3; border-radius: 6px; width: 90%; margin: 0 auto;">
+                            <strong>Slide:</strong> <t t-esc="delivery.slide_type.name"/>
+                            <t t-if="delivery.contract_id.slide_over and not delivery.contract_id.slide_under and not delivery.contract_id.slide_both"> - <t t-esc="delivery.contract_id.slide_over"/>¢</t>
+                            <t t-if="delivery.contract_id.slide_under and not delivery.contract_id.slide_over and not delivery.contract_id.slide_both"> - <t t-esc="delivery.contract_id.slide_under"/>¢</t>
+                            <t t-if="delivery.contract_id.slide_both and not delivery.contract_id.slide_over and not delivery.contract_id.slide_under"> - <t t-esc="delivery.contract_id.slide_both"/>¢</t>
+                            <t t-if="delivery.contract_id.slide_over and delivery.contract_id.slide_under and not delivery.contract_id.slide_both"> - <t t-esc="'↑'"/><t t-esc="delivery.contract_id.slide_over"/>¢ <t t-esc="'↓'"/><t t-esc="delivery.contract_id.slide_under"/>¢</t>
+                        </div>
+                    </td>
+                    <td style="width: 33%; vertical-align: top; text-align: center;">
+                        <div style="padding: 15px; background-color: #E3E3E3; border-radius: 6px; width: 90%; margin: 0 auto;">
+                            <strong>Sold Price:</strong> $<t t-esc="'%.2f' % delivery.contract_id.sold_price"/>
+                            <t t-if="delivery.contract_id.price_back"> ($<t t-esc="'%.2f' % delivery.contract_id.price_back"/> back)</t>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="delivery_table">
+        <div style="border: 2px solid #497336; border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <thead style="background-color: #497336;">
+                    <tr style="color: white; font-weight: 700;">
+                        <th style="width: 0.85in; padding: 10px 0;"></th>
+                        <th style="width: 0.6in; text-align: center; padding: 10px 0;">Head</th>
+                        <th style="width: 2in; text-align: center; padding: 10px 0;">Kind</th>
+                        <th style="width: 1in; text-align: center; padding: 10px 0;">Gross Weight</th>
+                        <th style="width: 0.6in; text-align: center; padding: 10px 0;">Shrink</th>
+                        <th style="width: 1in; text-align: center; padding: 10px 0;">Net Weight</th>
+                        <th style="width: 0.7in; text-align: center; padding: 10px 0;">Avg</th>
+                        <th style="width: 0.85in; text-align: center; padding: 10px 0;">Price</th>
+                        <th style="text-align: center; padding: 10px 0;">Gross</th>
+                    </tr>
+                </thead>
+                <!-- Contract Lines -->
+                <tbody>
+                    <tr>
+                        <td style="vertical-align: middle; text-align: right; font-weight: 700; font-style: italic; width: fit-content; padding: 5px 0;">Contract:</td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(delivery.contract_id.head1)"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="delivery.contract_id.kind1.name"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="delivery.contract_id.shrink_percentage"/>%</td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(delivery.contract_id.weight1)"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; padding: 5px 0;"></td>
+                    </tr>
+                    <tr style="background-color: #E3E3E3;">
+                        <td style="vertical-align: middle; text-align: center; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(delivery.contract_id.head2) if delivery.contract_id.head2 else ''"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="delivery.contract_id.kind2.name if delivery.contract_id.kind2 else ''"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center;  border-right: 1px solid #497336; padding: 5px 0;"><t t-if="delivery.contract_id.head2"><t t-esc="delivery.contract_id.shrink_percentage"/>%</t></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(delivery.contract_id.weight2) if delivery.contract_id.weight2 else ''"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; padding: 5px 0;"></td>
+                    </tr>
+                    <!-- Delivery Lines -->
+                    <t t-foreach="delivery.line_ids" t-as="line">
+                        <tr t-attf-style="background-color: #{'#E3E3E3' if (line_index + 1) % 2 == 0 else 'white'}">
+                        <td style="vertical-align: middle; text-align: right; font-weight: 700; font-style: italic; width: fit-content; padding: 5px 0;"><t t-if="line_index == 0">Delivery:</t></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(line.head_count)"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="line.description"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="'{:,}'.format(int(line.gross_weight))"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="line.shrink_percentage"/>%</td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="line.display_weight"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;"><t t-esc="line.display_average_weight"/></td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 5px 0;">$<t t-esc="'{:,.2f}'.format(line.price)"/></td>
+                        <td style="vertical-align: middle; text-align: center; padding: 5px 0;">$<t t-esc="'{:,.2f}'.format(line.gross_amount)"/></td>
+                        </tr>
+                    </t>
+                    <!-- Totals -->
+                    <tr style="border-top: 1px solid #497336;">
+                        <td style="vertical-align: middle; text-align: right; font-weight: 700; font-style: italic; width: fit-content; padding: 7px 0;">Totals:</td>
+                        <td style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 7px 0;"><t t-esc="'{:,}'.format(int(delivery.head_count))"/></td>
+                        <td colspan="6" style="vertical-align: middle; text-align: center; border-right: 1px solid #497336; padding: 7px 0;"></td>
+                        <td style="vertical-align: middle; text-align: center; font-weight: 700; padding: 7px 0;">$<t t-esc="'{:,.2f}'.format(delivery.gross_amount)"/></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+
+    <template id="seller_deductions">
+        <div style="padding: 10px 0; width: 100%;">
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #e3e3e3; border-radius: 6px; overflow: hidden;">
+                <thead>
+                    <tr style="background-color: #e3e3e3; font-weight: 700;">
+                        <th style="text-align: left; padding: 10px; width: 85%">Item</th>
+                        <th style="text-align: right; padding: 10px; width: 15%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span>Part Payment:</span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.part_payment)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">Gross Commission:</span>
+                            <t t-if="delivery.is_gross_commission_per_head">($<t t-esc="'{:,.2f}'.format(delivery.commission_rate)" widget="monetary"/> /hd)</t>
+                            <t t-if="not delivery.is_gross_commission_per_head">(<t t-esc="'{:,.2f}'.format(delivery.commission_rate)" widget="monetary"/>%)</t>
+                            <t t-esc="delivery.is_gross_commission_per_head" invisible="1"/>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.gross_commission)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">Consignment Fee:</span>
+                            <span>($<t t-esc="'{:,.2f}'.format(delivery.per_head_fee)"/> /hd)</span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.per_head_commission)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="background-color: #e3e3e3;">
+                        <td colspan="2" style="text-align: right; padding: 6px 10px 5px 10px; font-weight: 700;">
+                            <span  style="margin-right: 5px;">Total Commission:</span>
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.total_commission)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">National Beef Checkoff:</span>
+                            <span>($<t t-esc="'{:,.2f}'.format(delivery.national_beef_check_off_amount)"/> /hd)</span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.national_beef_check_off)" widget="monetary"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">State Beef Checkoff:</span>
+                            <span>(<t t-esc="delivery.beef_check_off_state_id.name" /> $<t t-esc="'{:,.2f}'.format(delivery.state_beef_check_off_amount)"/> /hd)</span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.state_beef_check_off)" widget="monetary"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">Freight Adjustment:</span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.freight_adjustment)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="">
+                        <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                            <span style="margin-right: 5px;">Other Deductions:</span>
+                            <span><t t-esc="delivery.other_deductions_description"/></span>
+                        </td>
+                        <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.other_deductions)"/></span>
+                        </td>
+                    </tr>
+                    <tr style="background-color: #e3e3e3; font-weight: 700;">
+                        <td style="text-align: left; padding: 10px;">Total Deductions:</td>
+                        <td style="text-align: right; padding: 10px;">
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.total_deductions)"/></span>
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+
+            <table style="margin-top: 10px; width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <tr style=" font-weight: 700;">
+                    <td style="width: 70%"></td>
+                    <td colspan="2" style="">
+                        <div style="border-radius: 6px; overflow: hidden; background-color: #fafafa; border: 2px solid #e3e3e3; text-align: center; padding: 10px; font-weight: 700;">
+                            <span style="margin-right: 5px;">Net Proceeds:</span>
+                            <span>$<t t-esc="'{:,.2f}'.format(delivery.net_proceeds)"/></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="seller_checks">
+        <div style="width: 100%; border: 1px solid #e3e3e3; border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #e3e3e3;">
+                <thead>
+                    <tr style="background-color: #e3e3e3; font-weight: 700;">
+                        <th style="text-align: center; padding: 10px; width: 10%">Check #</th>
+                        <th style="text-align: left; padding: 10px; width: 70%">Payable To</th>
+                        <th style="text-align: right; padding: 10px; width: 20%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="delivery.check_ids" t-as="check">
+                        <tr>
+                            <td style="text-align: center; padding: 3px 10px 2px 10px;">
+                                <span><t t-esc="check.check_number"/></span>
+                            </td>
+                            <td style="text-align: left; padding: 3px 10px 2px 10px;">
+                                <span><t t-esc="check.payable_to"/></span>
+                            </td>
+                            <td style="text-align: right; padding: 3px 10px 2px 10px;">
+                                <span>$<t t-esc="'{:,.2f}'.format(check.check_amount)"/></span>
+                            </td>
+                        </tr>
+                    </t>
+                    <tr>
+                        <td colspan="3" style="text-align: right; padding: 3px 10px 2px 10px;">
+                            <strong>Check Total: $<t t-esc="'{:,.2f}'.format(delivery.check_total)"/></strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <t t-if="delivery.adjustment_ids">
+                <table style="width: 100%; border-collapse: collapse; overflow: hidden; border: 0 solid transparent;">
+                    <thead>
+                        <tr style="background-color: #e3e3e3; font-weight: 700;">
+                            <th style="width: 20%; text-align: left; padding: 10px;">Adjustments</th>
+                            <th style="width: 65%;"></th>
+                            <th style="width: 15%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="delivery.adjustment_ids" t-as="adjustment">
+                            <tr style="border-bottom: 0.5px solid #e3e3e3;">
+                                <td style="vertical-align: middle; text-align: left; padding: 3px 10px 2px 10px; border-right: 0.5px solid #e3e3e3; border-left: 1px solid #e3e3e3;">
+                                    <span><t t-esc="adjustment.adjustment_type_display"/></span>
+                                </td>
+                                <td style="vertical-align: middle; text-align: left; padding: 3px 10px 2px 10px; border-right: 0.5px solid #e3e3e3;">
+                                    <span><t t-esc="adjustment.adjustment_description"/></span>
+                                </td>
+                                <td style="vertical-align: middle; text-align: right; padding: 3px 10px 2px 10px; border-right: 2px solid #e3e3e3;">
+                                    <span>$<t t-esc="'{:,.2f}'.format(adjustment.adjustment_amount)"/></span>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+            <table style="width: 100%; border-collapse: collapse; overflow: hidden; border: 0 solid transparent;">
+                <tr style="background-color: #e3e3e3; font-weight: 700;">
+                    <td colspan="3" style="vertical-align: middle; text-align: right; padding: 8px 10px 6px 10px;">
+                        <span style="margin-right: 30px;">
+                            <strong>Adjustments:</strong> 
+                            <span t-att-style="'color: #dc3545;' if delivery.adjustments &lt; 0 else 'color: #3d3d3d;' if delivery.adjustments == 0 else 'color: #0884A7;'">
+                                $<t t-esc="'{:,.2f}'.format(delivery.adjustments_display)"/>
+                            </span>
+                            <span t-if="delivery.adjustments &lt; 0" style="margin-left: 5px; color: #dc3545;">(overpaid)</span>
+                            <span t-if="delivery.adjustments &gt; 0" style="margin-left: 5px; color: #0884A7;">(underpaid)</span>
+                        </span>
+                        <span>
+                            <strong>Balance:</strong> 
+                            <span t-att-style="'color: #dc3545;' if delivery.adjustments_balance &lt; 0 else 'color: #3d3d3d;' if delivery.adjustments_balance == 0 else 'color: #0884A7;'">
+                                $<t t-esc="'{:,.2f}'.format(delivery.adjustments_balance_display)"/>
+                            </span>
+                            <span t-if="delivery.adjustments_balance &lt; 0" style="margin-left: 5px; color: #dc3545;">(overpaid)</span>
+                            <span t-if="delivery.adjustments_balance &gt; 0" style="margin-left: 5px; color: #0884A7;">(underpaid)</span>
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <template id="delivery_sheet_buyer_info">
+        <div style="padding: 10px 0;">
+            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <thead>
+                    <tr>
+                        <th style="width: 65%;"></th>
+                        <th style="width: 35%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div>
+                                <span>
+                                    <strong>Buyer:</strong>
+                                </span>
+                                <t t-esc="delivery.buyer_id.buyer_name if delivery.buyer_id.buyer_name else delivery.buyer_id.name"/>
+                            </div>
+                            <t t-if="delivery.destination">
+                                <div>
+                                    <span>
+                                        <strong>Destination:</strong>
+                                    </span>
+                                    <t t-esc="delivery.destination"/>
+                                </div>
+                            </t>
+                            <div>
+                                <span>
+                                    <strong>Rep(s):</strong>
+                                </span>
+                                <t t-foreach="delivery.rep_ids" t-as="rep">
+                                    <t t-esc="rep.rep_id.rep_name if rep.rep_id.rep_name else rep.rep_id.name" /> - <t t-esc="format_phone(rep.rep_id.phone)" /><t t-if="not rep_last">, </t>
+                                </t>
+                            </div>
+                            <t t-if="delivery.buyer_comments">
+                                <div>
+                                    <span>
+                                        <strong>Comments:</strong>
+                                    </span>
+                                    <t t-esc="delivery.buyer_comments"/>
+                                </div>
+                            </t>
+                            <t t-if="delivery.buyer_adjustments_description">
+                                <div>
+                                    <span>
+                                        <strong>Adjustment Description:</strong>
+                                    </span>
+                                    <t t-esc="delivery.buyer_adjustments_description"/>
+                                </div>
+                            </t>
+                        </td>
+                        <td>
+                            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <strong>Buyer Part Payment:</strong>
+                                        </td>
+                                        <td>
+                                            $<t t-esc="'{:,.2f}'.format(delivery.buyer_part_payment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Freight Adjustment:</strong>
+                                        </td>
+                                        <td>
+                                            $<t t-esc="'{:,.2f}'.format(delivery.freight_adjustment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Other Adjustments:</strong>
+                                        </td>
+                                        <td>
+                                            $<t t-esc="'{:,.2f}'.format(delivery.buyer_adjustment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                                        </td>
+                                    </tr>
+                                    <tr style="font-weight: 700; border-top: 1px solid #497336;">
+                                        <td style="padding-top: 5px;">
+                                            <strong>Net Due:</strong>
+                                        </td>
+                                        <td style="padding-top: 5px;">
+                                            $<t t-esc="'{:,.2f}'.format(delivery.total_due)" t-options='{"widget": "currency", "currency": "USD"}' />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <template id="buyer_invoice_info">
+        <div style="padding: 10px 0;">
+            <table style="width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <tr>
+                    <td style="width: 69%;">
+                        <t t-if="delivery.buyer_comments">
+                            <div>
+                                <strong>Comments:</strong>
+                            </div>
+                            <t t-esc="delivery.buyer_comments"/>
+                        </t>
+                    </td>
+                    <td style="padding: 2px 0; text-align: right; width: 1.5in;">
+                        <strong>Buyer Part Payment:</strong>
+                    </td>
+                    <td style="padding: 2px 0; text-align: center;">
+                        <t t-if="delivery.buyer_part_payment">
+                        $<t t-esc="'{:,.2f}'.format(delivery.buyer_part_payment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 69%;"></td>
+                    <td style="padding: 2px 0; text-align: right; width: 1.5in;">
+                        <strong>Freight Adjustment:</strong>
+                    </td>
+                    <td style="padding: 2px 0; text-align: center;">
+                        <t t-if="delivery.freight_adjustment">
+                            <t t-esc="'{:,.2f}'.format(delivery.freight_adjustment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 69%;"></td>
+                    <td style="padding: 2px 0 5px 0; text-align: right; width: 1.5in; border-bottom: 1px solid #497336;">
+                        <strong>Adjustments:</strong>
+                    </td>
+                    <td style="padding: 2px 0 5px 0; text-align: center; border-bottom: 1px solid #497336;">
+                        <t t-if="delivery.buyer_adjustment">
+                        $<t t-esc="'{:,.2f}'.format(delivery.buyer_adjustment)" t-options='{"widget": "currency", "currency": "USD"}' />
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 69%;"></td>
+                    <td style="padding: 2px 0 5px 0; text-align: right; width: 1.5in;">
+                        <strong>Net Due:</strong>
+                    </td>
+                    <td style="padding: 2px 0 5px 0; text-align: center; font-weight: 700;">
+                        <t t-if="delivery.total_due">
+                        $<t t-esc="'{:,.2f}'.format(delivery.total_due)" t-options='{"widget": "currency", "currency": "USD"}' />
+                        </t>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: left; padding: 10px 0;">
+                        <strong>Adjustment Description:</strong>
+                        <t t-esc="delivery.buyer_adjustments_description" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+
+    <!-- New Footer Template -->
+    <template id="delivery_footer">
+        <div style="border-top: 1px solid #497336; padding: 10px;">
+            <div style="text-align: center; font-weight: 700;">
+                <p style="margin: 0; font-style: italic;">Please remit payment to LiveAg, LLC | Be sure to include buyer and lot number on check and ACH memo.</p>
+                <p style="margin: 5px 0 0 0; font-style: italic;">Wire Transfer and ACH instructions:</p>
+                <p style="margin: 2px 0;">Huntington National Bank | 7 Easton Ave, Columbus, OH 43219</p>
+                <div style="line-height: 1.2;">
+                    <p style="margin: 0;">LiveAg, LLC</p>
+                    <p style="margin: 0;">Routing Number: 044000024</p>
+                    <p style="margin: 0;">Account Number: 01894147042</p>
+                </div>
+                <p style="margin: 2px 0; font-style: italic;">Overnight Delivery:</p>
+                <p style="margin: 0;"><b style="margin: 10px 0; font-size: 16px;">US Mail is NOT accepted</b></p>
+                <p style="margin: 0;">UPS or FEDEX: LiveAg, LLC | 108 W Angeline St. Groesbeck, TX 76642</p>
+                <p style="margin: 5px 0 0 0; font-size: 12px; font-style: italic;">LiveAg, LLC certifies that the Beef Checkoff assessment on the sale of the cattle referenced on this invoice<br />has been collected and remitted to the proper State Beef Council by LiveAg, LLC or the appropriate authority.</p>
+            </div>
+        </div>
+    </template>
+</odoo>

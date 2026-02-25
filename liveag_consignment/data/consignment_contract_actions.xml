@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.actions.server" id="action_merge_contracts">
+            <field name="name">Merge</field>
+            <field name="model_id" ref="liveag_consignment.model_consignment_contract"/>
+            <field name="binding_model_id" ref="liveag_consignment.model_consignment_contract" />
+            <field name="state">code</field>
+            <field name="binding_view_types">list</field>
+            <field name="code">
+if records:
+    records.merge_contracts()
+            </field>
+        </record>
+        <record model="ir.actions.server" id="action_set_delivery_on_contracts">
+            <field name="name">Set Deliveries in contracts</field>
+            <field name="model_id" ref="base.model_ir_actions_server"/>
+            <field name="binding_model_id" ref="base.model_ir_actions_server" />
+            <field name="state">code</field>
+            <field name="binding_view_types">list</field>
+            <field name="code">
+deliveries = env['consignment.delivery'].search([('state','not in',['canceled']),('contract_id','!=',False)])
+for d in deliveries:
+    d.contract_id['delivery_id'] = d.id
+            </field>
+        </record>
+        <record model="ir.actions.server" id="action_create_deliveries_for_contracts">
+            <field name="name">Create Deliveries for contracts</field>
+            <field name="model_id" ref="liveag_consignment.model_consignment_contract"/>
+            <field name="binding_model_id" ref="liveag_consignment.model_consignment_contract" />
+            <field name="state">code</field>
+            <field name="binding_view_types">list,form</field>
+            <field name="code">
+records._set_delivery()
+            </field>
+        </record>
+
+
+        <record model="ir.actions.server" id="action_update_merged_contracts_state">
+            <field name="name">Update Merged Contracts state</field>
+            <field name="model_id" ref="base.model_ir_actions_server"/>
+            <field name="binding_model_id" ref="base.model_ir_actions_server" />
+            <field name="state">code</field>
+            <field name="binding_view_types"></field>
+            <field name="code">
+contracts = env['consignment.contract'].search([('merged_contract_id','!=',False),('state','=','scratched')])
+contracts.write({'state':'merged'})    
+
+            </field>
+        </record>
+
+        <record model="ir.actions.server" id="action_split_contracts">
+            <field name="name">Split</field>
+            <field name="model_id" ref="liveag_consignment.model_consignment_contract"/>
+            <field name="binding_model_id" ref="liveag_consignment.model_consignment_contract" />
+            <field name="state">code</field>
+            <field name="binding_view_types">form</field>
+            <field name="code">
+if records:
+    action = records.split_contract()
+            </field>
+        </record>
+    </data>
+</odoo>

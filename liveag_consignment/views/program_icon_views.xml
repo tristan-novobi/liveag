@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="program_icon_view_list" model="ir.ui.view">
+        <field name="name">program.icon.view.list</field>
+        <field name="model">program.icon</field>
+        <field name="arch" type="xml">
+            <list string="Program Icons" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="image_url"/>
+                <field name="filename"/>
+                <field name="field_name"/>
+                <field name="priority"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="program_icon_view_search" model="ir.ui.view">
+        <field name="name">program.icon.view.search</field>
+        <field name="model">program.icon</field>
+        <field name="arch" type="xml">
+            <search string="Program Icons">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="program_icon_action" model="ir.actions.act_window">
+        <field name="name">Program Icons</field>
+        <field name="res_model">program.icon</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

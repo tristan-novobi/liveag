@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_auction_view_list" model="ir.ui.view">
+        <field name="name">sale.auction.view.list</field>
+        <field name="model">sale.auction</field>
+        <field name="arch" type="xml">
+            <list string="Auction" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="sale_type" optional="show"/>
+                <field name="location" optional="show"/>
+                <field name="number_sale_days" optional="show"/>
+                <field name="sale_date_begin" optional="show"/>
+                <field name="sale_date_est_end" optional="show"/>
+                <field name="state"
+                    decoration-success="state == 'live'"
+                    decoration-info="state == 'pending'"
+                    decoration-primary="state == 'scheduled'"
+                    widget="badge"
+                    optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sale_auction_view_search" model="ir.ui.view">
+        <field name="name">sale.auction.view.search</field>
+        <field name="model">sale.auction</field>
+        <field name="arch" type="xml">
+            <search string="Auction">
+                <field name="name"/>
+                <field name="sale_type"/>
+                <field name="location"/>
+                <separator/>
+                <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Scheduled" name="scheduled" domain="[('state', '=', 'scheduled')]"/>
+                <filter string="Live" name="live" domain="[('state', '=', 'live')]"/>
+                <group>
+                    <filter string="Status" name="state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter name="sale_type" string="Sale Type" domain="[]" context="{'group_by': 'sale_type'}"/>
+                    <filter string="Sale Date" name="sale_date_month" domain="[]" context="{'group_by': 'sale_date_begin'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="sale_auction_view_form" model="ir.ui.view">
+        <field name="name">sale.auction.form</field>
+        <field name="model">sale.auction</field>
+        <field name="arch" type="xml">
+            <form string="Auction">
+                <header>
+                    <button name="set_sale_order_in_contracts" string="Set lot order" type="object" class="btn-outline-primary" help="Set the order on the associated contracts."/>    
+                    <div class="dropdown" invisible="not sold_contracts_ids">
+                        <button name="dummy" type="object" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Sale Reports
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <button name="action_export_buyers_final" 
+                                string="Print Buyer's Final" 
+                                type="object" 
+                                class="dropdown-item"/>
+                            <button name="action_print_buyer_report" 
+                                string="Print Buyer Report" 
+                                type="object" 
+                                class="dropdown-item"/>
+                            <button name="action_export_sellers_final" 
+                                string="Print Seller's Final" 
+                                type="object" 
+                                class="dropdown-item"/>
+                            <button name="action_print_seller_report" 
+                                string="Print Seller Report"
+                                type="object" 
+                                class="dropdown-item"/>
+                            <button name="action_print_rep_report_final" 
+                                string="Print Rep Recap Final"
+                                type="object" 
+                                class="dropdown-item"/>
+                            <button name="action_print_rep_report" 
+                                string="Print Rep Recap"
+                                type="object" 
+                                class="dropdown-item"/>
+                        </div>
+                    </div>
+                    <div class="dropdown" invisible="not sold_contracts_ids">
+                        <button name="dummy" type="object" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            Send Emails
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <button name="action_send_buyer_reports"
+                                string="Send Buyer Report"
+                                type="object"
+                                class="dropdown-item"/>
+                            <button name="action_send_seller_reports"
+                                string="Send Seller Report"
+                                type="object"
+                                class="dropdown-item"/>
+                            <button name="action_send_rep_reports"
+                                string="Send Rep Recap"
+                                type="object"
+                                class="dropdown-item"/>
+                        </div>
+                    </div>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,scheduled,live,cancel" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_auction_emails" type="object" class="oe_stat_button" icon="fa-envelope">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Emails</span>
+                                </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Auction Name"/>
+                        </h1>
+                    </div>
+                    <group name="auction_header">
+                        <group name="left_details">
+                            <field name="company_id" invisible="1"/>
+                            <field name="location"/>
+                            <field name="catalog_deadline" required="1"/>
+                            <field name="is_public"/>
+                            <field name="head_offered"/>
+                            <field name="head_sold"/>
+                        </group>
+                        <group name="right_details">
+                            <field name="number_sale_days"/>
+                            <field name="sale_date_begin"/>
+                            <field name="sale_date_est_end"/>
+                            <field name="sale_type" options="{'no_open': True, 'no_create': True}"/>
+                        </group>
+                    </group>
+                    <group string="Sold Percentages" col-span="2" cols="4">
+                        <group col-span="4" style="width: 100%; display: flex; flex-direction: row;">
+                            <div>
+                                <label for="percentage_pending" string="Pending" help="Lots still in the auction."/>
+                                <field name="percentage_pending" widget="percentpie" optional="show"/>
+                            </div>
+                            <div>
+                                <label for="percentage_sold" string="Sold"/>
+                                <field name="percentage_sold" widget="percentpie" optional="show"/>
+                            </div>
+                            <div>
+                                <label for="percentage_no_sale" string="No Sale"/>
+                                <field name="percentage_no_sale" widget="percentpie" optional="show"/>
+                            </div>
+                            <div>
+                                <label for="percentage_scratched" string="Scratched"/>
+                                <field name="percentage_scratched" widget="percentpie" optional="show"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Contracts" name="contracts">
+                            <field name="filtered_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="sale_order"/>
+                                    <field name="lot_number"/>
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="state" widget="badge" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Pending" name="contracts">
+                            <field name="pending_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Sold" name="contracts">
+                            <field name="sold_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="lot_number"/>
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Scratched" name="contracts"  >
+                            <field name="scratched_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="lot_number"/>
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="No Sale" name="contracts"  >
+                            <field name="no_sale_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="lot_number"/>
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Canceled" name="contracts"  >
+                            <field name="canceled_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="lot_number"/>
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Drafts" name="contracts"  >
+                            <field name="draft_contracts_ids" nolabel="1" options="{'no_create': True}">
+                                <list delete="0">
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="state"
+                                        widget="badge"
+                                        optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_export_auction_contracts_auctic" model="ir.actions.server">
+        <field name="name">Auctic Export</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="binding_model_id" ref="model_sale_auction"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                auction_ids = env.context.get('active_ids')
+                if isinstance(auction_ids, (int, str)):
+                    auction_ids = [int(auction_ids)]
+                auctions = env['sale.auction'].browse(auction_ids)
+                if auctions:
+                    contracts = auctions.mapped('filtered_contracts_ids')
+                    if contracts:
+                        action = contracts.action_export_auctic_csv()
+        </field>
+    </record>
+
+    <record id="action_export_auction_contracts_catalog" model="ir.actions.server">
+        <field name="name">Catalog Export</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="binding_model_id" ref="model_sale_auction"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                auction_ids = env.context.get('active_ids')
+                if isinstance(auction_ids, (int, str)):
+                    auction_ids = [int(auction_ids)]
+                auctions = env['sale.auction'].browse(auction_ids)
+                if auctions:
+                    contracts = auctions.mapped('filtered_contracts_ids')
+                    if contracts:
+                        action = contracts.action_export_catalog_csv()
+        </field>
+    </record>
+
+    <record id="action_export_auction_contracts_gfx" model="ir.actions.server">
+        <field name="name">GFX Export</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="binding_model_id" ref="model_sale_auction"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                auction_ids = env.context.get('active_ids')
+                if isinstance(auction_ids, (int, str)):
+                    auction_ids = [int(auction_ids)]
+                auctions = env['sale.auction'].browse(auction_ids)
+                if auctions:
+                    contracts = auctions.mapped('filtered_contracts_ids')
+                    if contracts:
+                        action = contracts.action_export_gfx_csv()
+        </field>
+    </record>
+
+    <record id="sale_auction_action" model="ir.actions.act_window">
+        <field name="name">Auctions</field>
+        <field name="res_model">sale.auction</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

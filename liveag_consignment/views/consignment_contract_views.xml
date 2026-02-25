@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="consignment_contract_view_list" model="ir.ui.view">
+        <field name="name">consignment.contract.view.list</field>
+        <field name="model">consignment.contract</field>
+        <field name="arch" type="xml">
+            <list string="Consignment Contract" decoration-warning="state in ['changed','submitted']"
+                                    decoration-success="state in ['approved','sold']" 
+                                    decoration-info="state in ['ready_for_sale','delivery_ready']"
+                                    decoration-danger="state in ['scratched','no_sale','canceled']"
+                                    >
+                <field name="sale_order" optional="hide"/>
+                <field name="id" string="Contract ID" widget="char"/>
+                <field name="lot_number" optional="show"/>
+                <field name="create_uid" optional="hide"/>
+                <field name="auction_id"/>
+                <field name="kind1" optional="show"/>
+                <field name="kind2" optional="hide"/>
+                <field name="seller_id" optional="show"/>
+                <field name="region_id" optional="hide"/>
+                <field name="primary_rep" optional="show"/>
+                <field name="contract_type" optional="hide"/>
+                <field name="state"
+                    decoration-warning="state in ['changed','submitted']"
+                    decoration-success="state in ['approved','sold']" 
+                    decoration-info="state in ['ready_for_sale','delivery_ready']"
+                    decoration-danger="state in ['scratched','no_sale','canceled']" 
+                    widget="badge"
+                    optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="consignment_contract_view_search" model="ir.ui.view">
+        <field name="name">consignment.contract.view.search</field>
+        <field name="model">consignment.contract</field>
+        <field name="arch" type="xml">
+            <search string="Consignment Contract">
+                <field name="lot_number" optional="show"/>
+                <field name="id" string="Contract #"/>
+                <field name="sale_type"/>
+                <field name="auction_id"/>
+                <field name="contract_type"/>
+                <field name="seller_id"/>
+                <separator/>
+                <filter string="Has video link" name="has_video_link" domain="[('video_link', '!=', False)]"/>
+                <separator/>
+                <filter string="No video link" name="no_video_link" domain="[('video_link', '=', False)]"/>
+                <separator/>
+                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="Supplemental" name="supplemental" domain="[('is_supplemental', '=', True)]"/>
+                <group>
+                    <filter string="Status" name="group_state" domain="[]" context="{'group_by': 'state'}"/>
+                    <filter string="Sale Type" name="group_sale_type" domain="[]" context="{'group_by': 'sale_type'}"/>
+                    <filter string="Merged Contract" name="group_merged_contract" domain="[]" context="{'group_by': 'merged_contract_id'}"/>
+                    <filter string="Auction" name="group_auction" domain="[]" context="{'group_by': 'auction_id'}"/>
+                    <filter string="Seller" name="group_seller" domain="[]" context="{'group_by': 'seller_id'}"/>
+                    <filter string="Rep." name="group_rep" domain="[]" context="{'group_by': 'seller_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="consignment_contract_form" model="ir.ui.view">
+        <field name="name">consignment.contract.form</field>
+        <field name="model">consignment.contract</field>
+        <field name="arch" type="xml">
+            <form string="Consignment Contract">
+                <header>
+                    <div name="button_box" position="inside">
+                        <button class="oe_stat_button" 
+                                type="object" 
+                                name="action_merged_contracts">
+                            <span class="fa fa-exchange"/>
+                            <field string="Merged Contracts" name="merged_contract_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <button name="action_submit" 
+                        string="Submit"
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-primary" 
+                        help="Run validations and submit contract."
+                        invisible = "state not in ['draft']"/>
+                    <button name="action_cancel" 
+                        string="Cancel" 
+                        data-hotkey='a' 
+                        type="object" 
+                        class="btn-secondary" 
+                        help="Cancel contract."
+                        invisible = "state in ['canceled']"/>
+                    <button name="action_scratch" 
+                        string="Scratch" 
+                        data-hotkey='a' 
+                        type="object" 
+                        class="btn-warning" 
+                        help="Scratch contract."
+                        invisible = "state not in ['ready_for_sale']"/>
+                    <button name="action_ready_for_delivery" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="Ready for Delivery" 
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-primary" 
+                        help="Move to Ready for delivery."
+                        invisible = "state not in ['sold']"/>
+                    <button name="action_ready_to_sale" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="Ready for Sale" 
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-primary" 
+                        help="Move to Ready for sale."
+                        invisible = "state not in ['approved']"/>
+                    <button name="action_no_sale" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="No Sale" 
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-danger" 
+                        help="Move to no sale."
+                        invisible = "state not in ['ready_for_sale']"/>
+                    <button name="action_sold" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="Sold" 
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-success" 
+                        help="Move to sold."
+                        invisible = "state not in ['ready_for_sale']"/>
+                    <button name="action_set_to_draft" 
+                        string="Set to Draft" 
+                        data-hotkey='w' 
+                        type="object" 
+                        class="btn-secondary" 
+                        help="Reset to Draft."
+                        invisible = "state not in ['rejected','canceled']"/>
+                    <button name="action_approve" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="Approve" 
+                        data-hotkey='q' 
+                        type="object" 
+                        class="btn-outline-success" 
+                        help="Approve."
+                        invisible = "state not in ['submitted', 'changed']"/>
+                    <button name="action_reject" 
+                        groups="liveag_consignment.group_consignment_manager"
+                        string="Reject" 
+                        data-hotkey='z' 
+                        type="object" 
+                        class="btn-outline-danger" 
+                        help="Reject."
+                        invisible = "state not in ['submitted', 'changed']"/>
+                        <!-- groups="liveag_consignment.group_consignment_manager" -->
+                        <!-- class="btn-outline-danger"  -->
+                    <button name="action_merge_option_contracts" 
+                        string="Merge" 
+                        data-hotkey='m' 
+                        type="object" 
+                        help="Merge option contracts."
+                        invisible = "not can_merge_option_contracts"/>
+                    <field name="display_chatter" invisible="1"/>
+                    <button name="action_toggle_chatter" 
+                        string="Chatter" 
+                        invisible="display_chatter"
+                        data-hotkey='y' 
+                        type="object" 
+                        help="Hide/Display Chatter."
+                        />
+                    <button name="action_toggle_chatter" 
+                        string="Chatter" 
+                        invisible="not display_chatter"
+                        data-hotkey='y'
+                        class="btn-primary" 
+                        type="object" 
+                        help="Hide/Display Chatter."
+                        />
+                    <!-- <button name="liveag_consignment.contract_report"
+                        string="Print Contract"
+                        type="action"
+                        class="btn-info"
+                        help="Print the current contract."
+                        invisible = "state not in ['delivery_ready']"/> -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,ready_for_sale,changed,lotted,sold,delivery_ready,delivered" options="{'clickable': '1'}"/>
+                </header>
+                <field name="has_master_agreement" invisible="1"/>
+                <field name="has_past_auction_date" invisible="1"/>
+                <div class="alert alert-danger" role="alert" invisible="has_master_agreement">
+                    Seller does not have a Master Agreement.
+                </div>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                        <span style="display: flex; gap: 10px;" invisible="lot_number == False">
+                            <span>Lot</span>
+                            <field name="lot_number" readonly="1" invisible='lot_number == False' string="Lot "/>
+                        </span>
+                        <span style="display: flex; gap: 10px;" invisible="lot_number != False or id == False">
+                            <span>CN</span>
+                            <field name="id" widget="char" readonly="1" invisible='lot_number != False or id == False'/>
+                        </span>
+                        <span invisible="lot_number != False or id != False">
+                            <span>New Contract</span>
+                        </span>
+                        </h1>
+                    </div>
+                    <group name="contract_header">
+                        <group name="auction_details">
+                            <field name="company_id" invisible="1"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="consignment_id" invisible="1" readonly="1" />
+                            <field name="lot_number" />
+                            <field name="sale_type" options="{'no_open': True, 'no_create': True}" readonly="state not in ['draft']"/>
+                            <field name="is_special_sale_type" invisible="1"/>
+                            <field name="auction_id" 
+                                domain="[('sale_type','in',[sale_type])]" 
+                                readonly="state not in ['draft'] or is_special_sale_type"
+                                force_save="1"/>
+                            <field name="seller_id" 
+                                widget="res_partner_many2one" 
+                                readonly="state not in ['draft']"
+                                force_save="1"/>
+                            <!-- <div colspan="2" class="alert alert-danger" role="alert" invisible="not has_past_auction_date">
+                                Warning: The selected auction date is in the past.
+                            </div> -->
+                            <field name="contract_type"/>
+                            <!-- <field name="sale_order" readonly="1"/> -->
+                            <field name="sell_by_head"/>
+                            <field name="source_contract_id" readonly="1" invisible="not source_contract_id"/>
+                            <field name="option_on_contract"/>
+                            <field name="can_merge_option_contracts" invisible="not option_on_contract"/>
+                            <field name="merged_contract_id"/>
+                            <field name="is_supplemental" readonly="1"/>
+                        </group>
+                        <group name="sellers_details">
+                            <field name="lien_holder_id_domain" invisible="1" />
+                            <field name="asking_price"/>
+                            <field name="sold_date"/>
+                            <field name="sold_price"/>
+                            <field name="buyer_number_domain" invisible="1"/>
+                            <field name="buyer_id" 
+                                options="{'no_create': True, 'no_open': True}" 
+                                context="{'buyer_search': True}"
+                                placeholder="Search by name or buyer number" />
+                            <field name="buyer_number"/>
+                            <field name="delivery_date" invisible="state not in ['delivered']"/>
+                            <field name="delivery_id" 
+                                options="{'no_create_edit': True, 'no_quick_create':true, 'no_create':true}"
+                                invisible="not delivery_id" 
+                                readonly="state not in ['draft']"/>
+                            <field name="video_link"/>
+                            <field name="copied_contract_id" invisible="1"/>
+                            <label for="copied_contract_display" class="w-100" style="white-space: nowrap;" string="Copied From" invisible="not copied_contract_id"/>
+                            <div class="d-flex w-100 align-items-start" invisible="not copied_contract_id">
+                                <field name="copied_contract_display" style="width: fit-content;" readonly="1"/>
+                                <button name="action_open_copied_contract" type="object" icon="fa-external-link" class="btn-link oe_inline p-0 px-1" title="Open Copied Contract"/>
+                            </div>
+                            <field name="office_notes"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Head/Breed Info" name="head_breed_info">
+                            <group>
+                                <field name="display_slide_under" invisible="1"/>
+                                <field name="display_slide_over" invisible="1"/>
+                                <field name="display_slide_both" invisible="1"/>
+                                <group>
+                                    <field name="head1"/>
+                                    <field name="kind1" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="weight1"/>
+                                    <field name="all_black_hided"/>
+                                    <!-- <field name="loads1"/> -->
+                                </group>
+                                <group>
+                                    <field name="head2"/>
+                                    <field name="kind2" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="weight2"/>
+                                    <field name="price_back"/>
+                                    <!-- <field name="loads2"/> -->
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="weight_stop" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="slide_type" options="{'no_open': True, 'no_create': True}" domain="[('sell_by_head', '=', sell_by_head)]"/>
+                                    <field name="slide_under" invisible="not display_slide_under"/>
+                                    <field name="slide_over" invisible="not display_slide_over"/>
+                                    <field name="slide_both" invisible="not display_slide_both"/>
+                                    <field name="breed_type"/>
+                                </group>
+
+                                <group>
+                                    <field name="frame_size" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="flesh_type" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="weight_variance" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="horns" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="feeding_program"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="bangs_vaccinated" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="implanted_type" options="{'no_open': True, 'no_create': True}"/>
+                                    <label for="implanted_month" string="Implant Date"/>
+                                    <div class="o_row">
+                                        <field name="implanted_month" placeholder="Month" nolabel="1"/>
+                                        <field name="implanted_year" placeholder="Year" nolabel="1"/>
+                                    </div>
+                                    <field name="castration" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="origin" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="origin_description"/>
+                                    <field name="country_id" options="{'no_open': True, 'no_create': True}"/>
+                                    <!-- <field name="state_of_origin" widget="many2many_tags" options="{'no_create': True}"/> -->
+                                </group>
+                                <group>
+                                    <field name="comments"/>
+                                </group>
+                            </group>
+                            <group string="Option Lots" invisible="not option_on_contract">
+                                <field name="option_contract_ids" nolabel="1" colspan="2">
+                                    <list editable="bottom" 
+                                    decoration-warning="state== 'draft'"
+                                    decoration-danger="merged_contract_id != False"
+                                    decoration-success="merged_contract_id == False" >
+                                        <field name="state" column_invisible="1"/>
+                                        <field name="merged_contract_id" column_invisible="1"/>
+                                        
+                                        <control>
+                                            <create string="Add Existing Contract"/>
+                                        </control>
+                                        <button name="go_to_contract" type="object" icon="fa-external-link"/>
+                                        <field name="id" widget="char" string="Contract #" readonly="1"/>
+                                        <field name="lot_number" readonly="1"/>
+                                        <field name="head1"/>
+                                        <field name="delivery_date_start"/>
+                                        <field name="delivery_date_end"/>
+                                    </list>
+                                </field>
+                            </group>
+                            <button name="action_create_option_contract"
+                                    invisible="not option_on_contract"
+                                    string="Create New Option" 
+                                    type="object" 
+                                    class="btn-primary"/>
+                        </page>
+                        <page string="Programs" name="programs">
+                            <group>
+                                <group>
+                                    <field name="vac_program" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="special_section" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="vaccination_desc"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="genetic_merit_program" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="premium_genetics_program" widget="many2many_tags" options="{'no_create': True}"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="pi_free"/>
+                                    <field name="tag_840"/>
+                                </group>
+                                <group>
+                                    <field name="natural"/>
+                                    <field name="natural_plus"/>
+                                </group>
+                                <group>
+                                    <field name="value_added_nutrition" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                            </group>
+                            <group string="Third Party Programs">
+                                <group>
+                                    <field name="source_age_program" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="gap_program" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="nhtc"/>
+                                    <field name="beef_care"/>
+                                    <field name="imi_raise_well"/>
+                                    <field name="imi_pasture_raised"/>
+                                    <field name="verified_grassfed"/>
+                                </group>
+                                <group>
+                                    <field name="verified_natural"/>
+                                    <field name="bqa_certified"/>
+                                    <field name="cfp"/>
+                                    <field name="organic"/>
+                                    <field name="non_gmo"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Current Location" name="current_location">
+                            <group>
+                                <group>
+                                    <field name="current_fob" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="distance_to_nearest_town"/>
+                                    <field name="direction_to_nearest_town"/>
+                                    <field name="nearest_town"/>
+                                    <field name="state_of_nearest_town" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="region_id" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="distance_to_nearest_city"/>
+                                    <field name="direction_to_nearest_city"/>
+                                    <field name="nearest_city"/>
+                                    <field name="state_of_nearest_city" options="{'no_open': True, 'no_create': True}"/>
+                                </group>
+                                <group>
+                                    <field name="latitude"/>
+                                    <field name="longitude"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Delivery Info" name="delivery_info" >
+                            <group>
+                                <group>
+                                    <field name="buyer_receives_fob" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="whose_option" options="{'no_open': True, 'no_create': True}"/>
+                                    <field name="delivery_date_start"/>
+                                    <field name="delivery_date_end"/>
+                                    <label for="shrink_percentage"/>
+                                    <div name="shrink_percentage">
+                                        <field name="shrink_percentage" class="oe_inline"/> %
+                                    </div>
+                                    <field name="weighing_conditions"/>
+                                    <label for="total_gross_weight"/>
+                                    <div class="o_row">
+                                        <field name="total_gross_weight" class="oe_inline"/>
+                                        <span><field name="weight_uom" nolabel="1"/></span>
+                                        <!-- domain="[('category_id', 'in', [2])]" -->
+                                    </div>
+                                </group>
+                                <group>
+                                    <field name="freight_adjustment_amount"/>
+                                    <field name="seller_need_part_payment"/>
+                                    <field name="defer_part_payment"/>
+                                    <field name="option_contract_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="load_option" readonly="created_loads > 0 "/>
+                                    <field name="created_loads" readonly="1"/>
+                                    <field name="available_loads" readonly="1"/>
+                                    <field name="oversize_load"/>
+                                    <!-- <field name="oversize_load_weight"/> -->
+                                    <!-- <field name="final_head_count"/> -->
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Delivery" name="delivery" invisible="state not in ['delivery_ready']">
+                            <group string='Buyer Information'>
+                                <group>
+                                    <field name="buyer_number_domain" invisible="1"/>
+                                    <field name="buyer_id"/>
+                                    <label for="delivery_city" string="Delivery Location"/>
+                                    <div class="delivery_address">
+                                        <field name="delivery_city" class="delivery_address_city" nolabel="1" placeholder="City"/>
+                                        <field name="delivery_state" class="delivery_address_state" nolabel="1" placeholder="State" options="{'no_open': True, 'no_create': True}" context="{'default_country_id': 233}"/>
+                                    </div>
+                                </group>
+                                <group>
+                                    <field name="immediate_delivery"/>
+                                </group>
+                            </group>
+                            <group string='Drafts Summary'>
+                                <group>
+                                    <field name="draft_ids">
+                                        <list editable="bottom">
+                                            <control>
+                                                <create name="add_line_control" string="Add Draft" />
+                                            </control>
+                                            <field name="head_count" required="1" />
+                                            <field name="weight" required="1"/>
+                                            <field name="weight_average"/>
+                                        </list>
+                                    </field>
+
+                                    <!-- <field name="average_weight"/>
+                                    <field name="total_net_weight"/> -->
+                                </group>
+                                <group>
+                                    <field name="scale_head_count"/>
+                                    <field name="scale_weight"/>
+                                    <field name="sorted_off_head_count"/>
+                                    <field name="sorted_off_weight"/>
+                                    <!-- <separator/> -->
+                                    <field name="total_head_count"/>
+                                    <field name="total_weight"/>
+                                </group>
+                            </group>
+                            <group string='Weights'>
+                                <group>
+                                    <field name="shrink_percentage"/>
+                                    <field name="shrink_deduct"/>
+                                    <field name="total_net_weight" class="oe_inline"/>
+                                </group>
+                                <group>
+                                    <field name="slide_active" />
+                                    <field name="slide_adjustment"/>
+                                    <field name="slide_adjustment_cwt"/>
+
+                                    <!-- <field name="final_head_count"/> -->
+                                    
+                                </group>
+                            </group>
+                            
+                            <group string="Deductions">
+                                <field name="deductions_ids">
+                                    <list editable="bottom">
+                                        <control>
+                                            <create name="add_line_control" string="Add Deduction" />
+                                        </control>
+                                        <field name="deduction_type"/>
+                                        <field name="name"/>
+                                        <field name="commission"/>
+                                        <field name="state_id" domain="[('country_id.code', '=', 'US')]"/>
+                                        <field name="state_beef_checkoff"/>
+                                        <field name="debit" sum="Total"/>
+                                        <field name="credit" sum="Total"/>
+                                    </list>
+                                </field>
+                                <group>
+                                    <field name="slide_adjustment_cwt"/>
+                                </group>
+                                <group>
+                                    <field name="total_before_deductions"/>
+                                    <field name="price_per_pound"/>
+                                    <field name="final_price"/>
+                                </group>
+                            </group>
+                            <group string="Final Payment">
+                                <group>
+                                    <field name="total_before_deductions"/>
+                                    <field name="total_deductions"/>
+                                    <field name="net_price"/>
+                                </group>
+                            </group>
+                            <group string='Payment'>
+                                <group>
+                                    <field name="price_back"/>
+                                    <field name="freight_adjustment_amount"/>
+                                </group>
+                                <group>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Reps" name="reps" >
+                            <field name="rep_ids" readonly="state != 'draft'" context="{'default_seller_id': seller_id}">
+                                <list string="reps" editable="bottom">
+                                    <control>
+                                        <create name="add_line_control" string="Add a Rep" />
+                                    </control>
+                                    <field name="contract_id" column_invisible="True"/>
+                                    <field name="seller_id" optional='hide' context="{'seller': parent.seller_id}"/> 
+                                    <field name="rep_id" context="{'reps': parent.rep_ids}" options="{'no_create_edit': True, 'no_quick_create':true, 'no_create':true}"/>
+                                    <field name="consigning_rep"/>
+                                    <field name="percentage_commission" sum="Total"/>
+                                    <field name="rep_sold_head_count" string="Head Count" readonly="1" digits="[16,0]" sum="Total"/>
+                                </list>         
+                            </field>
+                        </page>
+                        <page string="Addendum" name="addendum">
+                            <field name="show_addendum_warning" invisible="1"/>
+                            <div class="alert alert-warning" role="alert" 
+                                invisible="not show_addendum_warning">
+                                <field name="addendum_warning" readonly="1" nolabel="1"/>
+                            </div>
+
+                            <field name="addendum_ids">
+                                <list string="Addendums" editable="bottom">
+                                    <field name="seller_id_domain" column_invisible="True"/>
+                                    <field name="contract_id" column_invisible="True"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="seller_id" string="Seller" 
+                                    domain="[('id', 'in', seller_id_domain)]"
+                                    />
+                                    <field name="seller_address" string="Address" readonly="1"/>
+                                    <field name="lien_holder_id" string="Lien Holder" />
+                                    <field name="percentage" string="Percentage" />
+                                    <field name="head_count" string="Head Count" />
+                                    <field name="part_payment" 
+                                    sum="Total Seller Part Payment" 
+                                    string="Part Payment" 
+                                    readonly="1" />
+                                </list>
+                            </field>
+                        </page>
+                        <field name="is_merged_contract" invisible="1"/>
+                        <page string="Source Contracts" name="source" invisible="not is_merged_contract" >
+                            <field name="source_contract_ids" readonly="1" context="{'active_test': False}" >
+                                <list delete="0">
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                </list>
+                            </field>
+                        </page>
+                        <field name="is_split_contract" invisible="1"/>
+                        <page string="Split Contracts" name="source" invisible="not created_loads > 0" >
+                            <field name="split_contract_ids" readonly="1" context="{'active_test': False}" >
+                                <list delete="0">
+                                    <field name="id" widget="char" string="Contract #"/>
+                                    <field name="lot_number" optional="hide"/>
+                                    <field name="sale_type"/>
+                                    <field name="sold_price"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Activity" name="activity" >
+                            <field name="activity_log_ids">
+                                <list string="activity" editable="bottom" create="false" delete="false" no_open="true">
+                                    <field name="contract_id" column_invisible="True"/>
+                                    <field name="message"/>
+                                    <field name="field_label" string="Field Changed"/>
+                                    <field name="old_value"/> 
+                                    <field name="new_value"/> 
+                                    <field name="timestamp"/> 
+                                    <field name="user_id"/>
+                                </list>         
+                            </field>
+                        </page>
+                        <page string="Catalog Changes" name="catalog_changes" invisible="not catalog_changes_ids">
+                            <field name="catalog_changes_ids">
+                                <list decoration-info="state == 'pending'" 
+                                decoration-success="state == 'approved'" 
+                                decoration-danger="state == 'rejected'"
+                                editable="bottom"
+                                create="0">
+                                    <field name="create_date"/>
+                                    <field name="field_name"/>
+                                    <field name="old_value"/>
+                                    <field name="new_value"/>
+                                    <field name="state"/>
+                                    <field name="catalog_change"/>
+                                    <field name="approved_by"/>
+                                    <field name="approved_date"/>
+                                    <field name="notes"/>
+                                    <button name="action_approve" 
+                                        string="Approve" 
+                                        type="object" 
+                                        class="btn-primary" 
+                                        invisible="state != 'pending'"/>
+                                    <button name="action_reject" 
+                                        string="Reject" 
+                                        type="object" 
+                                        class="btn-danger" 
+                                        invisible="state != 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Changes" name="changes" invisible="not changes_ids">
+                            <field name="changes_ids">
+                                <list decoration-info="state == 'pending'" 
+                                decoration-success="state == 'approved'" 
+                                decoration-danger="state == 'rejected'"
+                                editable="bottom"
+                                create="0">
+                                    <field name="create_date"/>
+                                    <field name="field_name"/>
+                                    <field name="old_value"/>
+                                    <field name="new_value"/>
+                                    <field name="state"/>
+                                    <field name="catalog_change"/>
+                                    <field name="approved_by"/>
+                                    <field name="approved_date"/>
+                                    <field name="notes"/>
+                                    <button name="action_approve" 
+                                        string="Approve" 
+                                        type="object" 
+                                        class="btn-primary" 
+                                        invisible="state != 'pending'"/>
+                                    <button name="action_reject" 
+                                        string="Reject" 
+                                        type="object" 
+                                        class="btn-danger" 
+                                        invisible="state != 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <field name="display_chatter" invisible="1"/>
+                <chatter invisible="not display_chatter"/>
+            </form>
+        </field>
+    </record>
+
+    <record id="consignment_contract_action" model="ir.actions.act_window">
+        <field name="name">Consignment Contracts</field>
+        <field name="res_model">consignment.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+
+    <record id="action_export_auctic_csv" model="ir.actions.server">
+        <field name="name">Auctic Export CSV</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="binding_model_id" ref="model_consignment_contract"/>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                contract_ids = env.context.get('active_ids')
+                if isinstance(contract_ids, (int, str)):
+                    contract_ids = [int(contract_ids)]
+                contracts = env['consignment.contract'].browse(contract_ids)
+                if contracts:
+                    action = contracts.action_export_auctic_csv()
+        </field>
+    </record>
+
+    <record id="action_export_auctic_v2_csv" model="ir.actions.server">
+        <field name="name">Auctic Export CSV v2</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="binding_model_id" ref="model_consignment_contract"/>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                contract_ids = env.context.get('active_ids')
+                if isinstance(contract_ids, (int, str)):
+                    contract_ids = [int(contract_ids)]
+                contracts = env['consignment.contract'].browse(contract_ids)
+                if contracts:
+                    action = contracts.action_export_auctic_v2_csv()
+        </field>
+    </record>
+
+    <record id="action_export_contracts_catalog_csv" model="ir.actions.server">
+        <field name="name">Catalog Export CSV</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="binding_model_id" ref="model_consignment_contract"/>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                contract_ids = env.context.get('active_ids')
+                if isinstance(contract_ids, (int, str)):
+                    contract_ids = [int(contract_ids)]
+                contracts = env['consignment.contract'].browse(contract_ids)
+                if contracts:
+                    action = contracts.action_export_catalog_csv()
+        </field>
+    </record>
+
+    <record id="action_export_gfx_csv" model="ir.actions.server">
+        <field name="name">GFX Export</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="binding_model_id" ref="model_consignment_contract"/>
+        <field name="state">code</field>
+        <field name="code">
+            if env.context.get('active_ids'):
+                contract_ids = env.context.get('active_ids')
+                if isinstance(contract_ids, (int, str)):
+                    contract_ids = [int(contract_ids)]
+                contracts = env['consignment.contract'].browse(contract_ids)
+                if contracts:
+                    action = contracts.action_export_gfx_csv()
+        </field>
+    </record>
+
+    <record id="view_country_state_list" model="ir.ui.view">
+        <field name="name">liveag.country.state.list</field>
+        <field name="model">res.country.state</field>
+        <field name="inherit_id" ref="base.view_country_state_tree"/>
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="region_id" options="{'no_open': True, 'no_create': True}"/>
+                <field name="beef_checkoff"/>
+            </field>
+        </field>
+    </record>
+</odoo>

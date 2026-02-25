@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Main Auction Menu -->
+    <menuitem id="menu_auction_root"
+        name="Auctions"
+        groups="liveag_consignment.group_consignment_manager"
+        web_icon="fa fa-gavel,#FFFFFF,#34495e"
+        sequence="11">
+
+        <!-- Auction List Menu -->
+        <menuitem id="menu_sale_auction_list"
+            name="Auctions"
+            action="liveag_consignment.sale_auction_action"
+            sequence="10"/>
+
+        <!-- Configuration Submenu -->
+        <menuitem id="menu_auction_config"
+            name="Configuration"
+            groups="liveag_consignment.group_consignment_manager"
+            sequence="100">
+
+            <menuitem id="menu_sale_type"
+                name="Sale Types"
+                action="liveag_consignment.sale_type_action"
+                sequence="10"/>
+
+            <!-- Add more configuration menu items as needed -->
+
+        </menuitem>
+    </menuitem>
+</odoo>

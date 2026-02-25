@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Paper Format -->
+        <record id="paperformat_consignment_contract" model="report.paperformat">
+            <field name="name">Consignment Contract</field>
+            <field name="default" eval="False"/>
+            <field name="format">Letter</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">10</field>
+            <field name="margin_bottom">10</field>
+            <field name="margin_left">10</field>
+            <field name="margin_right">10</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">5</field>
+            <field name="disable_shrinking" eval="True"/>
+            <field name="dpi">96</field>
+        </record>
+        
+        <!-- QWeb Reports -->
+        <record id="seller_contract" model="ir.actions.report">
+            <field name="name">Seller Contract</field>
+            <field name="model">consignment.contract</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">liveag_consignment.report_consignment_seller_contract</field>
+            <field name="report_file">liveag_consignment.report_consignment_seller_contract</field>
+            <field name="print_report_name">'Consignment Contract - CN %05d' % (object.id)</field>
+            <field name="attachment">'consignment_contract_CN_%05d.pdf' % (object.id)</field>
+            <field name="binding_model_id" ref="model_consignment_contract"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_consignment_contract"/>
+        </record>
+
+        <!-- QWeb Reports -->
+        <record id="buyer_contract" model="ir.actions.report">
+            <field name="name">Buyer Contract</field>
+            <field name="model">consignment.contract</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">liveag_consignment.report_consignment_buyer_contract</field>
+            <field name="report_file">liveag_consignment.report_consignment_buyer_contract</field>
+            <field name="print_report_name">'Consignment Contract - CN %05d' % (object.id)</field>
+            <field name="attachment">'consignment_contract_CN_%05d.pdf' % (object.id)</field>
+            <field name="binding_model_id" ref="model_consignment_contract"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="paperformat_consignment_contract"/>
+        </record>
+
+        <record id="contract_report_html" model="ir.actions.report">
+            <field name="name">Consignment Contract Report (HTML)</field>
+            <field name="model">consignment.contract</field>
+            <field name="report_type">qweb-html</field>
+            <field name="report_name">liveag_consignment.report_consignment_contract</field>
+            <field name="report_file">liveag_consignment.report_consignment_contract</field>
+            <field name="binding_model_id" ref="model_consignment_contract"/>
+            <field name="binding_type">action</field>
+        </record>
+    </data>
+</odoo>

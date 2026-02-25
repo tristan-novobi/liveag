@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- list View -->
+    <record id="view_consignment_delivery_list" model="ir.ui.view">
+        <field name="name">consignment.delivery.list</field>
+        <field name="model">consignment.delivery</field>
+        <field name="arch" type="xml">
+            <list string="Deliveries" decoration-info="state == 'draft'" decoration-success="state == 'delivered'" decoration-muted="state == 'canceled'">
+                <field name="lot_number" string="Lot #" optional="show"/>
+                <field name="name" invisible="lot_number"/>
+                <field name="contract_id"/>
+                <field name="seller_id"/>
+                <field name="buyer_id"/>
+                <field name="delivery_date"/>
+                <field name="head_count" sum="Total Head"/>
+                <field name="gross_weight" sum="Total Gross Weight"/>
+                <field name="net_weight" sum="Total Net Weight"/>
+                <field name="gross_amount" sum="Total Gross Amount"/>
+                <field name="net_proceeds" sum="Total Net Proceeds"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_consignment_delivery_form" model="ir.ui.view">
+        <field name="name">consignment.delivery.form</field>
+        <field name="model">consignment.delivery</field>
+        <field name="arch" type="xml">
+            <form string="Delivery">
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_deliver" string="Mark as Delivered" type="object" class="oe_highlight" invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state not in ('draft', 'confirmed')"/>
+                    <button name="action_draft" string="Set to Draft" type="object" invisible="state != 'canceled'"/>
+                    <button name="%(liveag_consignment.action_delivery_sheet_wizard)d" string="Delivery Sheet" type="action" class="btn-secondary" icon="fa-list"/>
+                    <button name="%(liveag_consignment.action_buyer_invoice_wizard)d" string="Buyer Invoice" type="action" class="btn-primary" icon="fa-file"/>
+                    <!-- <button name="action_merge" string="Merge" type="object" class="btn-primary" invisible="state not in ('draft')"><span class="fa fa-code-fork" style="display:inline-block; transform: scaleY(-1);"/> Merge</button> -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,delivered"/>
+                </header>
+                <sheet>
+                    <!-- Header Section -->
+                    <div class="oe_title">
+                        <h1>
+                            <div invisible="not lot_number">
+                                Lot <field name="lot_number" nolabel="1" class="oe_inline"/>
+                            </div>
+                            <field name="name" invisible="lot_number" readonly="1"/>
+                        </h1>
+                    </div>                    <!-- Basic Information -->
+                    <group>
+                        <group>
+                            <!-- <field name="lot_number" string="Lot No:"/> -->
+                            <field name="merged_delivery_id" invisible="not merged_delivery_id"/>
+                            <field name="contract_id" options="{'no_create': True, 'no_open': False}"/>
+                            <field name="seller_id"/>
+                            <field name="sell_by_head"/>
+                        </group>
+                        <group>
+                            <field name="delivery_date"/>
+                            <field name="scheduled_delivery_date"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company" invisible="1"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Contract Figures Table -->
+                    <group>
+                        <field name="contract_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+
+                    <group class="text-left" string="Contract">
+                        
+                        <field name="slide_type_name" invisible="1"/>
+                        <field name="is_gain_slide" invisible="1"/>
+                        
+                        <div class="row" colspan="2">
+                            <div class="col-12">
+                                <table class="table table-sm table-bordered" style="width: 100%; max-width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">Wt Stop</th>
+                                            <th class="text-center">Slide Type</th>
+                                            <th class="text-center" invisible="not display_slide_over">Slide (Over)</th>
+                                            <th class="text-center" invisible="not display_slide_under">Slide (Under)</th>
+                                            <th class="text-center" invisible="not display_slide_both">Slide (Both)</th>
+                                            <th class="text-center">Head Count</th>
+                                            <th class="text-center">Price Back</th>
+                                            <th class="text-center">Avg. Wt.</th>
+                                            <th class="text-center">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-center"><field name="weight_stop_id" options="{'no_open': True, 'no_create': True}"/></td>
+                                            <td class="text-center">
+                                                <field name="sell_by_head" invisible="1"/>
+                                                <field name="slide_type" options="{'no_open': True, 'no_create': True}" domain="[('sell_by_head', '=', sell_by_head)]"/>
+                                                <field name="slide_type_name" invisible="1"/>
+                                                <field name="gain_price" invisible="1"/>
+                                                <field name="display_slide_over" invisible="1"/>
+                                                <field name="display_slide_under" invisible="1"/>
+                                                <field name="display_slide_both" invisible="1"/>
+                                            </td>
+                                            <th class="text-center" invisible="not display_slide_over">
+                                                <field name="slide_over"/>
+                                            </th>
+                                            <th class="text-center" invisible="not display_slide_under">
+                                                <field name="slide_under"/>
+                                            </th>
+                                            <th class="text-center" invisible="not display_slide_both">
+                                                <field name="slide_both"/>
+                                            </th>
+                                            <td class="text-center" style="display: flex; justify-content: center;">
+                                                Hd. 1:<field name="contract_head1" style="width: 50px;"/>
+                                                <span invisible="contract_head2 == 0" style="margin-left: 10px;">Hd. 2:<field name="contract_head2" style="width: 50px;"/></span>
+                                            </td>
+                                            <td class="text-center"><field name="price_back" widget="monetary" digits="[10,0]"/></td>
+                                            <td class="text-center" style="display: flex; justify-content: center;">
+                                                Wt. 1:<field name="contract_weight" style="width: 50px;"/>
+                                                <span invisible="contract_weight2 == 0" style="margin-left: 10px;">Wt. 2:<field name="contract_weight2" style="width: 50px;"/></span>
+                                            </td>
+                                            <!-- <td class="text-center"><field name="contract_weight" digits="[10,0]"/></td> -->
+                                            <td class="text-center"><field name="base_price" widget="monetary"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </group>
+                    
+                    <!-- Main Delivery Table with Line Items -->
+                    <div class="row">
+                        <div class="col-12">
+                            <group string="Delivery">
+                                <field name="line_ids" colspan="2" nolabel="1" style="width: 100%; max-width: 100%;">
+                                    <list editable="bottom" default_order="sequence,id">
+                                        <field name="is_gain_line" invisible="1" column_invisible="1"/>
+                                        <field name="head_group" invisible="1" column_invisible="1"/>
+                                        <field name="head_count" invisible="is_gain_line"/>
+                                        <field name="description"/>
+                                        <field name="gross_weight" digits="[10,0]" invisible="is_gain_line"/>
+                                        <field name="shrink_percentage" digits="[10,1]" invisible="is_gain_line"/>
+                                        <field name="net_weight" column_invisible="1" digits="[10,0]" readonly="1" invisible="1"/>
+                                        <field name="display_weight" string="Net Weight" readonly="1"/>
+                                        <field name="average_weight" column_invisible="1" digits="[10,0]" readonly="1" invisible="1"/>
+                                        <field name="display_average_weight" string="Avg. Wt." invisible="is_gain_line" readonly="1"/>
+                                        <field name="price" widget="monetary"/>
+                                        <field name="is_price_back" string="$ Back" invisible="is_gain_line"/>
+                                        <field name="gross_amount" widget="monetary" readonly="1"/>
+                                        <field name="currency_id" invisible="1" column_invisible="1"/>
+                                        <field name="sequence" invisible="1" column_invisible="1"/>
+                                    </list>
+                                    <form>
+                                        <group>
+                                            <field name="head_count"/>
+                                            <field name="description"/>
+                                            <field name="gross_weight" digits="[10,0]"/>
+                                            <field name="shrink_percentage"/>
+                                            <field name="price" widget="monetary"/>
+                                            <field name="currency_id" invisible="1"/>
+                                        </group>
+                                    </form>
+                                </field>
+                                
+                                <!-- Totals Row -->
+                                <div colspan="2" style="width: 100%; max-width: 100%;">
+                                    <table class="table table-sm table-bordered" style="width: 100%; max-width: 100%; margin-top: 0;">
+                                        <tr>
+                                            <td style="width: 7%; text-align: center;">Totals</td>
+                                            <td style="width: 13%;"><field name="head_count" style="margin-bottom: 0px;" readonly="1"/></td>
+                                            <td style="width: 15%; text-align: center;"></td>
+                                            <td style="width: 20%; text-align: center;"></td>
+                                            <td style="width: 15%;">
+                                                <field name="net_weight" digits="[10,0]" style="margin-bottom: 0px;" readonly="1"/>
+                                            </td>
+                                            <td style="width: 10%; text-align: center;"></td>
+                                            <td style="width: 10%; text-align: right;">Total</td>
+                                            <td style="width: 10%; text-align: center;"><field name="gross_amount" style="margin-bottom: 0px;" readonly="1" widget="monetary"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </group>
+                            <!-- <div class="text-muted mt-2">
+                                <small>* Payable weight capped per contract terms. When actual average weight exceeds the weight stop, payment is calculated using the maximum payable weight allowed.</small>
+                                <div>
+                                    <field name="is_overweight" invisible="1"/>
+                                    <field name="is_underweight" invisible="1"/>
+                                    
+                                    <div>
+                                        <small><strong>A. Conventional Slide</strong></small><br/>
+                                        <small>Formula: Adjusted Price = Base Price - (Slide¢ × (Actual Avg Weight - Contract Avg Weight) ÷ 100)</small><br/>
+                                        <small>Example: Base weight 850 lbs, Slide 10¢, Base price $250.00/cwt, Actual weight 865 lbs</small><br/>
+                                        <small>Calculation: 865 - 850 = 15 lbs over at 10¢ = $1.50</small><br/>
+                                        <small>Adjusted price: $250.00 - $1.50 = $248.50/cwt</small><br/><br/>
+                                        
+                                        <small><strong>B. Two-Way Slide</strong></small><br/>
+                                        <small>Formula for overweight: Adjusted Price = Base Price - (Slide¢ × (Actual Avg Weight - Contract Avg Weight) ÷ 100)</small><br/>
+                                        <small>Formula for underweight: Adjusted Price = Base Price + (Slide¢ × (Contract Avg Weight - Actual Avg Weight) ÷ 100)</small><br/>
+                                        <small>Example (Overweight): Base weight 850 lbs, Slide 10¢, Base price $250.00/cwt, Actual weight 865 lbs</small><br/>
+                                        <small>Calculation: 865 - 850 = 15 lbs over at 10¢ = $1.50</small><br/>
+                                        <small>Adjusted price: $250.00 - $1.50 = $248.50/cwt</small><br/>
+                                        <small>Example (Underweight): Base weight 850 lbs, Slide 10¢, Base price $250.00/cwt, Actual weight 835 lbs</small><br/>
+                                        <small>Calculation: 850 - 835 = 15 lbs under at 10¢ = $1.50</small><br/>
+                                        <small>Adjusted price: $250.00 + $1.50 = $251.50/cwt</small><br/><br/>
+                                        
+                                        <small><strong>C. LiveAg Two-Way Slide</strong></small><br/>
+                                        <small>Formula for overweight: Adjusted Price = Base Price - (Slide¢ × (Actual Avg Weight - Contract Avg Weight) ÷ 100)</small><br/>
+                                        <small>Formula for underweight: Adjusted Price = Base Price + ((Slide¢ ÷ 2) × (Contract Avg Weight - Actual Avg Weight) ÷ 100)</small><br/>
+                                        <small>Example (Overweight): Base weight 850 lbs, Slide 10¢ up/5¢ down, Base price $250.00/cwt, Actual weight 865 lbs</small><br/>
+                                        <small>Calculation: 865 - 850 = 15 lbs over at 10¢ = $1.50</small><br/>
+                                        <small>Adjusted price: $250.00 - $1.50 = $248.50/cwt</small><br/>
+                                        <small>Example (Underweight): Base weight 850 lbs, Slide 10¢ up/5¢ down, Base price $250.00/cwt, Actual weight 835 lbs</small><br/>
+                                        <small>Calculation: 850 - 835 = 15 lbs under at 5¢ = $0.75</small><br/>
+                                        <small>Adjusted price: $250.00 + $0.75 = $250.75/cwt</small><br/><br/>
+                                        
+                                        <small><strong>D. Gain Slide</strong></small><br/>
+                                        <small>Formula:</small><br/>
+                                        <small>1. Payment for base weight: Head Count × Base Weight × Base Price ÷ 100</small><br/>
+                                        <small>2. Payment for weight gain: (Total Net Weight - (Head Count × Base Weight)) × Gain Price</small><br/>
+                                        <small>3. Total payment: Payment for base weight + Payment for weight gain</small><br/>
+                                        <small>Example: Base weight 300 lbs, Head count 150 steers, Base price $350.00/cwt, Gain price $1.00/lb, Total net weight 48,240 lbs</small><br/>
+                                        <small>Base weight total: 150 × 300 = 45,000 lbs</small><br/>
+                                        <small>Weight gain: 48,240 - 45,000 = 3,240 lbs</small><br/>
+                                        <small>Payment for base weight: 45,000 × $350.00 ÷ 100 = $157,500.00</small><br/>
+                                        <small>Payment for weight gain: 3,240 × $1.00 = $3,240.00</small><br/>
+                                        <small>Total payment: $157,500.00 + $3,240.00 = $160,740.00</small><br/><br/>
+                                    </div>
+                                    
+                                    <div invisible="slide_type_name in ['None', 'Gain Slide']">
+                                        <small><strong>Current Calculation:</strong>
+                                            <field name="price_adjustment"/> adjustment
+                                            (<field name="adjusted_weight_difference"/> lbs difference at
+                                            <field name="slide_over" invisible="is_overweight == False"/>
+                                            <field name="slide_under" invisible="is_underweight == False"/>
+                                            <field name="slide_both" invisible="slide_type_name != 'Both'"/>¢)
+                                        </small>
+                                    </div>
+                                    
+                                    <div invisible="slide_type_name != 'Gain Slide'">
+                                        <small><strong>Current Calculation:</strong></small><br/>
+                                        <small>* Base weight payment: <field name="head_count"/> × <field name="contract_weight"/> × <field name="base_price"/> ÷ 100 = <field name="base_weight_payment" widget="monetary"/></small><br/>
+                                        <small>* Weight gain: <field name="net_weight"/> - (<field name="head_count"/> × <field name="contract_weight"/>) = <field name="weight_gain"/> lbs</small><br/>
+                                        <small>* Weight gain payment: <field name="weight_gain"/> × <field name="gain_price"/> = <field name="weight_gain_payment" widget="monetary"/></small>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+                    
+                    <group string="Seller Deductions" colspan="2" col="2">
+                        <div colspan="2" class="col-12">
+                            <table class="table table-sm table-bordered" style="width: 100%; max-width: 100%; border: 1px solid #dee2e6;">
+                                <thead style="background-color: #e3e3e3;">
+                                    <tr>
+                                        <th style="width: 80%; text-align: left; border: 1px solid #dee2e6;">Item</th>
+                                        <th style="width: 20%; text-align: right; border: 1px solid #dee2e6;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 60%; text-align: left; border: 1px solid #dee2e6;"><strong>Part Payment:</strong></td>
+                                        <td style="width: 40%; text-align: right; border: 1px solid #dee2e6;"><field name="part_payment" widget="monetary"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;"><strong>Gross Commission:</strong>
+                                            <span style="color: #6c757d; margin-left: 10px;" invisible="is_gross_commission_per_head">(<field name="commission_rate" digits="[10,2]" style="width: 40px;"/>%)</span>
+                                            <span style="color: #6c757d; margin-left: 10px;" invisible="not is_gross_commission_per_head">($<field name="commission_rate" digits="[10,2]" style="width: 40px;"/> /hd)</span>
+                                            <span style="color: #6c757d; margin-left: 10px;"><field name="is_gross_commission_per_head"/> per head</span>
+                                        </td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field style="display: flex; justify-content: end; width: 100%;" name="gross_commission" widget="monetary" readonly="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;"><strong>Consignment Fee:</strong>
+                                        <span style="color: #6c757d; margin-left: 10px;">($<field name="per_head_fee" style="width: 40px;"/> /hd)</span></td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field style="display: flex; justify-content: end; width: 100%;" name="per_head_commission" widget="monetary" readonly="1"/></td>
+                                    </tr>
+                                    <tr style="background-color: #e3e3e3;">
+                                        <td style="text-align: right; border: 1px solid #dee2e6; margin-right: 10px;"><strong>Total Commission:</strong></td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="total_commission" style="display: flex; justify-content: end; width: 100%;" widget="monetary" readonly="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;">
+                                            <strong>Nat'l Beef Check Off:</strong>
+                                            <span style="color: #6c757d; margin-left: 10px;">($<field name="national_beef_check_off_amount" style="width: 40px;"/> /hd)</span>
+                                        </td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="national_beef_check_off" style="display: flex; justify-content: end; width: 100%;" widget="monetary" readonly="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;">
+                                            <strong>State Beef Check Off (<field name="beef_check_off_state_id" class="oe_inline"/>):</strong>
+                                            <span style="color: #6c757d; margin-left: 10px;">($<field name="state_beef_check_off_amount" style="width: 40px;"/> /hd)</span>
+                                        </td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="state_beef_check_off" style="display: flex; justify-content: end; width: 100%;" widget="monetary" readonly="1"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;"><strong>Freight Adjustment:</strong></td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="freight_adjustment" widget="monetary"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #dee2e6;"><strong>Other Deductions:</strong>
+                                            <span style="color: #6c757d; margin-left: 10px;">(<field name="other_deductions_description" style="width: 70%;"/>)</span>
+                                        </td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="other_deductions" widget="monetary"/></td>
+                                    </tr>
+                                    <tr style="background-color:#e3e3e3;">
+                                        <td style="text-align: left; border: 1px solid #dee2e6;"><strong>Total Deductions</strong></td>
+                                        <td style="text-align: right; border: 1px solid #dee2e6;"><field name="total_deductions" widget="monetary" style="text-align: right; display: flex; justify-content: end;" readonly="1"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div colspan="2" style="display: flex; justify-content: flex-end;" class="row mt-2">
+                            <div class="col-12" style="width: fit-content;">
+                                <table class="table table-sm table-bordered" style="width: 100%; max-width: 100%; border: 1px solid #dee2e6; background-color: #f8f9fa;">
+                                    <tr>
+                                        <td style="width: 60%; padding: 10px; text-align: center; border: 1px solid #dee2e6;"><strong>Net Proceeds:</strong></td>
+                                        <td style="width: 40%; padding: 10px; text-align: right; border: 1px solid #dee2e6;"><strong><field style="margin-bottom: 0px;" name="net_proceeds" widget="monetary"/></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </group>
+                    <!-- Check Information Section -->
+                    <notebook>
+                        <page string="Check Information" col="2">
+                            <div colspan="2" class="col-12">
+                                <field name="check_ids" style="width: 100%; max-width: 100%;">
+                                    <list editable="bottom">
+                                        <field name="check_number"/>
+                                        <field name="payable_to"/>
+                                        <field name="check_amount" widget="monetary"/>
+                                        <field name="currency_id" invisible="1" column_invisible="1"/>
+                                        <field name="is_primary" invisible="1" column_invisible="1"/>
+                                    </list>
+                                </field>
+                            </div>
+                        </page>
+                        <page string="Adjustments">
+                            <field name="adjustment_ids" style="width: 100%; max-width: 100%;">
+                                <list editable="bottom">
+                                    <field name="adjustment_type"/>
+                                    <field name="adjustment_description"/>
+                                    <field name="adjustment_amount" widget="monetary"/>
+                                    <field name="currency_id" invisible="1" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Reps">  
+                            <field name="rep_ids" style="width: 100%; max-width: 100%;">
+                                <list editable="bottom">
+                                    <field name="rep_id"/>
+                                    <field name="consigning_rep"/>
+                                    <field name="percentage_commission"/>
+                                    <field name="rep_delivered_head_count" string="Head Count" readonly="1" digits="[16,0]"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Source Deliveries" invisible="not source_delivery_ids">
+                            <field name="source_delivery_ids" style="width: 100%; max-width: 100%;">
+                                <list editable="bottom">
+                                    <field name="id"/>
+                                    <field name="lot_number" readonly="1"/>
+                                    <field name="delivery_date"/>
+                                    <field name="price_back" widget="monetary"/>
+                                    <!-- <field name="currency_id" invisible="1" column_invisible="1"/> -->
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                    <group>
+                        <div colspan="2" class="col-12">
+                            <div style="background-color: #f8f9fa; width: 100%; max-width: 100%; margin-top: 10px; border: 1px solid #dee2e6; display: flex; justify-content: flex-end; align-items: center;">
+                                <div style="display: flex; align-items: center; padding: 10px 20px; border-right: 1px solid #dee2e6;">
+                                    <strong style="margin-right: 5px;">Adjustments:</strong>
+                                    <field name="adjustments" invisible="1"/>
+                                    <field name="adjustments_display" widget="monetary"
+                                            style="margin-bottom: 0px; width: fit-content; font-weight: 700"
+                                            readonly="1"
+                                            decoration-danger="adjustments &lt; 0"
+                                            decoration-info="adjustments &gt; 0"/>
+                                    <span invisible="adjustments &gt;= 0" style="margin-left: 5px; color: #dc3545;">(overpaid)</span>
+                                    <span invisible="adjustments &lt;= 0" style="margin-left: 5px; color: #0884A7;">(underpaid)</span>
+                                </div>
+                                <div style="display: flex; align-items: center; padding: 10px 20px;">
+                                    <strong style="margin-right: 5px;">Balance:</strong>
+                                    <field name="adjustments_balance" invisible="1"/>
+                                    <field name="adjustments_balance_display" widget="monetary"
+                                            style="margin-bottom: 0px; width: fit-content; font-weight: 700"
+                                            readonly="1"
+                                            decoration-danger="adjustments_balance &lt; 0"
+                                            decoration-info="adjustments_balance &gt; 0"/>
+                                    <span invisible="adjustments_balance &gt;= 0" style="margin-left: 5px; color: #dc3545;">(overpaid)</span>
+                                    <span invisible="adjustments_balance &lt;= 0" style="margin-left: 5px; color: #0884A7;">(underpaid)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </group>
+                    
+                    <!-- Buyer Information -->
+                    <group string="Buyer Information">
+                        <group>
+                            <field name="buyer_id" string="Buyer:"/>
+                            <field name="destination" string="Destination:"/>
+                            <field name="paid_at_delivery" string="Paid @ Delivery:"/>
+                            <field name="buyer_called" string="Buyer Called:"/>
+                            <field name="rep_id" string="Rep:"/>
+                            <field name="funds_sent_via" string="Funds Sent via:"/>
+                            <field name="buyer_comments" string="Buyer Comments:"/>
+                        </group>
+                        <group>
+                            <div class="row" colspan="2">
+                                <div class="col-12">
+                                    <table class="table table-sm table-bordered" style="width: 100%; max-width: 100%;">
+                                        <tr>
+                                            <td style="text-align: left; width: 80%;"><strong>Gross Amount:</strong></td>
+                                            <td style="text-align: right; width: 20%;"><field name="gross_amount_due" widget="monetary" style="text-align: right; display: flex; justify-content: end;"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; width: 80%;"><strong>Part Payment:</strong></td>
+                                            <td style="text-align: right; width: 20%;"><field name="buyer_part_payment" widget="monetary" style="text-align: right; display: flex; justify-content: end;"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; width: 80%;"><strong>Freight Adjustment:</strong></td>
+                                            <td style="text-align: right; width: 20%;"><field name="freight_adjustment" widget="monetary" style="text-align: right; display: flex; justify-content: end;"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left; width: 80%;"><strong>Other Adjustments:</strong>
+                                                <span style="color: #6c757d; margin-left: 10px;">(<field name="buyer_adjustments_description" style="width: 50%;"/>)</span>
+                                            </td>
+                                            <td style="text-align: right; width: 20%;"><field name="buyer_adjustment" widget="monetary" style="text-align: right; display: flex; justify-content: end;"/></td>
+                                        </tr>
+                                        <tr style="background-color: #f8f9fa;">
+                                            <td style="text-align: left; width: 80%;"><strong>Total Due</strong></td>
+                                            <td style="text-align: right; width: 20%;"><field name="total_due" widget="monetary" style="text-align: right; display: flex; justify-content: end;"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_consignment_delivery_search" model="ir.ui.view">
+        <field name="name">consignment.delivery.search</field>
+        <field name="model">consignment.delivery</field>
+        <field name="arch" type="xml">
+            <search string="Search Deliveries">
+                <field name="name"/>
+                <field name="contract_id"/>
+                <field name="lot_number"/>
+                <field name="seller_id"/>
+                <field name="buyer_id"/>
+                <field name="delivery_date"/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
+                <filter string="Delivered" name="delivered" domain="[('state','=','delivered')]"/>
+                <filter string="Canceled" name="canceled" domain="[('state','=','canceled')]"/>
+                <filter string="Merged" name="merged" domain="[('state','=','merged')]"/>
+                <separator/>
+                <filter string="This Month" name="this_month" domain="[('delivery_date','&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d')), ('delivery_date','&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
+                <group>
+                    <filter string="Contract" name="group_by_contract" context="{'group_by': 'contract_id'}"/>
+                    <filter string="Seller" name="group_by_seller" context="{'group_by': 'seller_id'}"/>
+                    <filter string="Buyer" name="group_by_buyer" context="{'group_by': 'buyer_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Delivery Date" name="group_by_delivery_date" context="{'group_by': 'delivery_date'}"/>
+                    <filter string="Merged Delivery" name="group_by_merged_delivery" context="{'group_by': 'merged_delivery_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_consignment_delivery" model="ir.actions.act_window">
+        <field name="name">Deliveries</field>
+        <field name="res_model">consignment.delivery</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_consignment_delivery_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new delivery
+            </p>
+            <p>
+                Create and manage deliveries for consignment contracts.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_consignment_delivery"
+              name="Deliveries"
+              parent="liveag_consignment.liveag_consignment_menu_root"
+              action="action_consignment_delivery"
+              sequence="35"/>
+</odoo>

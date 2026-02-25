@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="slide_type_view_list" model="ir.ui.view">
+        <field name="name">slide.type.view.list</field>
+        <field name="model">slide.type</field>
+        <field name="arch" type="xml">
+            <list string="Slide Type" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="id" optional="hide"/>
+                <field name="name"/>
+                <field name="label"/>
+                <field name="sell_by_head"/>
+                <field name="above"/>
+                <field name="under"/>
+                <field name="both"/>
+                <field name="description"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="slide_type_form" model="ir.ui.view">
+        <field name="name">slide.type.form</field>
+        <field name="model">slide.type</field>
+        <field name="arch" type="xml">
+            <form string="Slide type">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="label"/>
+                        <field name="above"/>
+                        <field name="under"/>
+                        <field name="both"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="slide_type_view_search" model="ir.ui.view">
+        <field name="name">slide.type.view.search</field>
+        <field name="model">slide.type</field>
+        <field name="arch" type="xml">
+            <search string="Slide Type">
+                <field name="label"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="slide_type_action" model="ir.actions.act_window">
+        <field name="name">Slide Types</field>
+        <field name="res_model">slide.type</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Slide Type found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

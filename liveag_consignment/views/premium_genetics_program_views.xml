@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="premium_genetics_program_view_list" model="ir.ui.view">
+        <field name="name">premium.genetics.program.view.list</field>
+        <field name="model">premium.genetics.program</field>
+        <field name="arch" type="xml">
+            <list string="Premium Genetics Program" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="icon"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="premium_genetics_program_view_search" model="ir.ui.view">
+        <field name="name">premium.genetics.program.view.search</field>
+        <field name="model">premium.genetics.program</field>
+        <field name="arch" type="xml">
+            <search string="Premium Genetics Program">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="premium_genetics_program_action" model="ir.actions.act_window">
+        <field name="name">Premium Genetics Programs</field>
+        <field name="res_model">premium.genetics.program</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

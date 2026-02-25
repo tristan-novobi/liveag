@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="email_template_buyer_invoice" model="mail.template">
+            <field name="name">Buyer Delivery Invoice Email</field>
+            <field name="model_id" ref="model_consignment_delivery"/>
+            <field name="subject">Delivery Invoice - Lot #{{ object.lot_number }}</field>
+            <field name="email_from">office@live-ag.com</field>
+            <field name="reply_to">office@live-ag.com</field>
+            <field name="partner_to">{{ object.buyer_id.id }}</field>
+            <field name="report_template_ids" eval="[(4, ref('liveag_consignment.action_report_buyer_invoice'))]"/>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Dear <t t-out="object.buyer_id.name"/>,
+                    </p>
+                    <br/>
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Please find attached the delivery invoice for Lot #<t t-out="object.lot_number"/>.
+                    </p>
+                    <br/>
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        <strong>Lot # <t t-out="object.lot_number"/></strong><br/>
+                        • Buyer: <t t-out="object.buyer_id.name if object.buyer_id else ''"/><br/>
+                        • Delivery Date: <t t-out="object.delivery_date.strftime('%m/%d/%Y') if object.delivery_date else ''"/><br/>
+                        • Auction Date: <t t-out="object.contract_id.sold_date.strftime('%m/%d/%Y') if object.contract_id and object.contract_id.sold_date else ''"/><br/>
+                        <br/>
+                        <strong>Delivery Information:</strong><br/>
+                        • Delivery Gross Weight: <t t-out="'{:,.0f}'.format(sum(object.line_ids.mapped('gross_weight')) if object.line_ids else 0)"/> lbs<br/>
+                        • Delivery Net Weight: <t t-out="'{:,.0f}'.format(sum(object.line_ids.mapped('net_weight')) if object.line_ids else 0)"/> lbs<br/>
+                        • Average Weight: <t t-out="'{:,.0f}'.format(sum(object.line_ids.mapped('average_weight')) if object.line_ids else 0)"/> lbs
+                    </p>
+                    <br/>
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        If you have any questions, please don't hesitate to contact us.
+                    </p>
+                    <br/>
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        Best regards,<br/>
+                        <strong>LiveAg, LLC</strong><br/>
+                        108 W Angeline St<br/>
+                        Groesbeck, TX 76642<br/>
+                        Phone: 817-533-6699
+                    </p>
+                </div>
+            </field>
+            <field name="lang">en_US</field>
+            <field name="auto_delete" eval="True"/>
+            <field name="email_layout_xmlid" ref="mail.mail_notification_light"/>
+        </record>
+
+    <record id="mail_template_auction_report" model="mail.template">
+        <field name="name">Auction Report Email</field>
+        <field name="model_id" ref="model_auction_report_email"/>
+        <field name="subject">{{ object.auction_id.name or 'Auction' }} - {{ ctx.get('report_type_label') or 'Report' }}</field>
+        <field name="email_from">office@live-ag.com</field>
+        <field name="reply_to">office@live-ag.com</field>
+        <field name="email_to">{{ object.email_to or '' }}</field>
+        <field name="auto_delete" eval="False"/>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px; font-size: 13px;">
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Hello <t t-out="ctx.get('partner_name') or ''"/>,
+                </p>
+                <br/>
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Please find attached your <t t-out="ctx.get('report_type_label') or 'Report'"/> for auction
+                    "<t t-out="object.auction_id.name"/>".
+                </p>
+                <br/>
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    If you have any questions, please reply to this email.
+                </p>
+                <br/>
+                <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                    Best regards,<br/>
+                    <strong><t t-out="object.auction_id.company_id.name"/></strong>
+                </p>
+            </div>
+        </field>
+        <field name="email_layout_xmlid" ref="mail.mail_notification_light"/>
+    </record>
+</odoo>

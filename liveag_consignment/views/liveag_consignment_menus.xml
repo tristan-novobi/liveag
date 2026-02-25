@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="liveag_consignment_menu_root"
+        name="Consignment"
+        groups="liveag_consignment.group_consignment_manager"
+        web_icon="fa fa-database,#FFFFFF,#34495e"
+        sequence="10">
+
+        <menuitem id="menu_consignment_contract"
+            name="Consignment Contracts"
+            action="liveag_consignment.consignment_contract_action"
+            sequence="30"/>
+
+        <menuitem id="menu_sale_auction"
+            name="Auctions"
+            action="liveag_consignment.sale_auction_action"
+            sequence="40"/>
+            
+        <menuitem id="menu_consignment_activity"
+            name="Activity"
+            action="contract_activity_log_action"
+            sequence="50"/>
+
+        <menuitem id="menu_consignment_config"
+                name="Configuration"
+                groups="liveag_consignment.group_consignment_manager"
+                sequence="60">
+
+            <menuitem id="menu_sale_type"
+                name="Sale Types"
+                action="liveag_consignment.sale_type_action"
+                sequence="5"/>
+
+            <menuitem id="menu_contract_type"
+                name="Contract Types"
+                action="liveag_consignment.contract_type_action"
+                sequence="10"/>
+
+            <menuitem id="menu_kind_list"
+                name="Kinds"
+                action="liveag_consignment.kind_list_action"
+                sequence="20"/>
+
+            <menuitem id="menu_slide_type"
+                name="Slide Types"
+                action="liveag_consignment.slide_type_action"
+                sequence="30"/>
+
+            <menuitem id="menu_weight_stop"
+                name="Weight Stops"
+                action="liveag_consignment.weight_stop_action"
+                sequence="40"/>
+
+            <menuitem id="menu_origin_list"
+                name="Origins"
+                action="liveag_consignment.origin_list_action"
+                sequence="50"/>
+
+            <menuitem id="menu_frame_size"
+                name="Frame Sizes"
+                action="liveag_consignment.frame_size_action"
+                sequence="60"/>
+
+            <menuitem id="menu_flesh_type"
+                name="Flesh Types"
+                action="liveag_consignment.flesh_type_action"
+                sequence="70"/>
+
+            <menuitem id="menu_weight_variance"
+                name="Weight Variances"
+                action="liveag_consignment.weight_variance_action"
+                sequence="80"/>
+
+            <menuitem id="menu_horns_list"
+                name="Horns"
+                action="liveag_consignment.horns_list_action"
+                sequence="90"/>
+
+            <menuitem id="menu_vac_program"
+                name="VAC Programs"
+                action="liveag_consignment.vac_program_action"
+                sequence="95"/>
+
+            <menuitem id="menu_bangs_vaccinated"
+                name="Bangs Vaccinated"
+                action="liveag_consignment.bangs_vaccinated_action"
+                sequence="100"/>
+
+            <menuitem id="menu_special_section"
+                name="Special Section"
+                action="liveag_consignment.special_section_action"
+                sequence="90"/>
+
+            <menuitem id="menu_genetic_merit"
+                name="Genetic Merit"
+                action="liveag_consignment.genetic_merit_action"
+                sequence="100"/>
+
+            <menuitem id="menu_premium_genetics_program"
+                name="Premium Genetics Programs"
+                action="liveag_consignment.premium_genetics_program_action"
+                sequence="105"/>
+
+            <menuitem id="menu_van_program"
+                name="Value Added Nutrition Programs"
+                action="liveag_consignment.van_program_action"
+                sequence="106"/>
+
+            <menuitem id="menu_gap_program"
+                name="GAP Programs"
+                action="liveag_consignment.gap_program_action"
+                sequence="107"/>
+
+            <menuitem id="menu_location_type"
+                name="Location Types"
+                action="liveag_consignment.location_type_action"
+                sequence="110"/>
+
+            <menuitem id="menu_whose_option"
+                name="Whose Options"
+                action="liveag_consignment.whose_option_action"
+                sequence="120"/>
+
+            <menuitem id="menu_implanted_list"
+                name="Implanted List"
+                action="liveag_consignment.implanted_list_action"
+                sequence="130"/>
+
+            <menuitem id="menu_castration_list"
+                name="Castration"
+                action="liveag_consignment.castration_list_action"
+                sequence="140"/>
+
+            <menuitem id="menu_third_party_age"
+                name="3rd Party Age/Source"
+                action="liveag_consignment.third_party_age_action"
+                sequence="150"/>
+
+            <menuitem id="menu_program_icon"
+                name="Program Icons"
+                action="liveag_consignment.program_icon_action"
+                sequence="150"/>
+
+            <menuitem id="menu_regions"
+                name="Regions"
+                action="region_action"
+                sequence="150"/>
+
+        </menuitem>
+    </menuitem>
+</odoo>

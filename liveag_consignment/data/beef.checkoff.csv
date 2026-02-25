@@ -1,0 +1,51 @@
+state_code,national_beef_checkoff,state_beef_checkoff,other_state_fees,description,brand_inspector_national,brand_inspector_state
+"AL",1,1,0,"",0,0
+"AK",1,0,0,"",0,0
+"AZ",0,0,0,"",1,0
+"AR",1,0,1,"AR Brucellosis Fund",0,0
+"CA",0,0,0,"(Beef & Brand $2.75)",1,1
+"CO",0,0,0,"",1,0
+"CN",1,0,0,"",0,0
+"DE",1,0,0,"",0,0
+"FL",1,0,0,"",0,0
+"GA",1,1,0,"",0,0
+"HI",1,0,0,"",0,0
+"ID",0,0,0,"",1,0.5
+"IL",1,0.5,0,"",0,0
+"IN",1,0,0,"",0,0
+"IA",1,0.5,0,"",0,0
+"KS",1,0,0.2,"KS Animal Health",0,0
+"KY",1,1,0,"",0,0
+"LA",1,0,0,"",0,0
+"ME",1,0,0,"",0,0
+"MD",1,0,0,"",0,0
+"MA",1,0,0,"",0,0
+"MI",1,0,0,"Maximum of $1 per head. Animals sold for $1,000 or more - assessment is $1.00 per head. For animals sold for under $1,000 - assessment is .1% of sales prices.",0,0
+"MN",1,0,0,"",0,0
+"MS",1,0,0,"",0,0
+"MO",1,0,0,"",0,0
+"MT",0,0,0,"",1,0
+"NE",1,0,0,"**LiveAg collects in some parts of the State**",1,0
+"NV",0,0,0,"",1,0
+"NH",1,0,0,"",0,0
+"NJ",1,0,0,"",0,0
+"NM",0,0,0,"",1,1
+"NY",1,0,0,"",0,0
+"NC",1,1,0,"",0,0
+"ND",1,1,0,"",0,0
+"OH",1,1,0,"",0,0
+"OK",1,0,0,"",0,0
+"OR",0,0,0,"",1,0.5
+"PA",1,0,0,"",0,0
+"RI",1,0,0,"",0,0
+"SC",1,0.5,0,"",0,0
+"SD",1,0,0,"",0,0
+"TN",1,0.5,0,"",0,0
+"TX",1,1,0,"",0,0
+"UT",0,0,0,"",1,0.5
+"VT",1,0,0,"",0,0
+"VA",1,0.5,0,"",0,0
+"WA",0,0,0,"",1,0.5
+"WV",1,0,0,"",0,0
+"WI",1,0,0,"",0,0
+"WY",0,0,0,"",1,0

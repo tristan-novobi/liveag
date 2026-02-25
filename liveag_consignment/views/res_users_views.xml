@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_users_filter_inherit" model="ir.ui.view">
+        <field name="name">res.users.search.inherit</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_search"/>
+        <field name="arch" type="xml">
+            <!-- Add clerk_user_id field to search -->
+            <field name="name" position="after">
+                <field name="clerk_user_id" string="Clerk User ID"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="res_users_form_inherit_clerk_user_id" model="ir.ui.view">
+      <field name="name">res.users.form.inherit.clerk_user_id</field>
+      <field name="model">res.users</field>
+      <field name="inherit_id" ref="base.view_users_form"/>
+      <field name="arch" type="xml">
+
+        <!-- Insert right after Login -->
+        <xpath expr="//field[@name='login']" position="after">
+          <label for="clerk_user_id" string="Clerk User ID"/>
+          <field name="clerk_user_id" widget="CopyClipboardChar" class="ps-3 w-50"/>
+        </xpath>
+
+      </field>
+    </record>
+</odoo>
+

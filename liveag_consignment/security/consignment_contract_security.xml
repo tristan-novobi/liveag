@@ -1,0 +1,149 @@
+<odoo>
+    <!-- Contract Rules -->
+    <!-- Admin can see and edit everything -->
+    <record id="rule_consignment_manager" model="ir.rule">
+        <field name="name">LiveAg Manager</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <!-- Rep can see and edit their contracts -->
+    <record id="rule_consignment_rep" model="ir.rule">
+        <field name="name">LiveAg Rep</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="domain_force">['|',('rep_ids.rep_id','=',user.partner_id.id),('create_uid','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_rep'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Seller can only view their contracts -->
+    <record id="rule_consignment_seller" model="ir.rule">
+        <field name="name">LiveAg Seller</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="domain_force">[('seller_id','=',user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_seller'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Buyer can only view their contracts -->
+    <record id="rule_consignment_buyer" model="ir.rule">
+        <field name="name">LiveAg Buyer</field>
+        <field name="model_id" ref="model_consignment_contract"/>
+        <field name="domain_force">[('buyer_id','=',user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_buyer'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Partner Rules -->
+    <!-- Admin can manage all partners -->
+    <record id="rule_partner_manager" model="ir.rule">
+        <field name="name">LiveAg Manager - Partner Access</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <!-- Rep can manage their assigned sellers, those sellers' child contacts (e.g. payment_address), and all Rep-type partners (full list of reps) -->
+    <record id="rule_partner_rep" model="ir.rule">
+        <field name="name">LiveAg Rep - Partner Access</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="domain_force">['|', '|', ('rep_ids.rep_id', '=', user.partner_id.id), ('parent_id.rep_ids.rep_id', '=', user.partner_id.id), ('contact_type_ids.name', '=', 'Rep')]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_rep'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Seller can only view their own record -->
+    <record id="rule_partner_seller" model="ir.rule">
+        <field name="name">LiveAg Seller - Partner Access</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="domain_force">[('id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_seller'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Buyer can only view their own record -->
+    <record id="rule_partner_buyer" model="ir.rule">
+        <field name="name">LiveAg Buyer - Partner Access</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="domain_force">[('id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_buyer'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Auction Rules -->
+    <!-- Admin can manage all auctions -->
+    <record id="rule_auction_manager" model="ir.rule">
+        <field name="name">LiveAg Manager - Auction Access</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_manager'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+    <!-- Rep can see auctions in scheduled, live, finished, closed -->
+    <record id="rule_auction_rep" model="ir.rule">
+        <field name="name">LiveAg Rep - Auction Access</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="domain_force">[('state', 'in', ['scheduled', 'live', 'finished', 'closed'])]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_rep'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Seller can see auctions in scheduled, live, finished, closed -->
+    <record id="rule_auction_seller" model="ir.rule">
+        <field name="name">LiveAg Seller - Auction Access</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="domain_force">[('state', 'in', ['scheduled', 'live', 'finished', 'closed'])]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_seller'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Buyer can see auctions in scheduled, live, finished, closed -->
+    <record id="rule_auction_buyer" model="ir.rule">
+        <field name="name">LiveAg Buyer - Auction Access</field>
+        <field name="model_id" ref="model_sale_auction"/>
+        <field name="domain_force">[('state', 'in', ['scheduled', 'live', 'finished', 'closed'])]</field>
+        <field name="groups" eval="[(4, ref('liveag_consignment.group_consignment_buyer'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+</odoo>

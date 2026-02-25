@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_filter_inherit" model="ir.ui.view">
+        <field name="name">res.partner.search.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <!-- Add buyer_number field to search -->
+            <field name="name" position="after">
+                <field name="buyer_number_ids" string="Buyer Number"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="res_partner_lien_holder_inherit" model="ir.ui.view">
+        <field name="name">res.partner.lien.holder.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="function" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="vat" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="website" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="category_id" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </field>
+            <field name="function" position="before">
+                <field name="contact_type_ids" required="1" widget="many2many_tags"/>
+                <field name="clerk_user_id" widget="CopyClipboardChar" class="mb-2 ps-3"/>
+                <field name="lien_holder_ids" invisible="1" />
+                <field name="default_lien_holder_id" widget="res_partner_many2one" 
+                    options="{'no_create_edit': True, 'no_quick_create':true, 'no_create':true}" 
+                    domain="[('id', 'in', lien_holder_ids)]"
+                    invisible="hide_seller_fields"/>
+                <field name="default_payment_info_id" widget="res_partner_many2one" 
+                    options="{'no_create_edit': True, 'no_quick_create':true, 'no_create':true}" 
+                    domain="[('id', 'in', child_ids),( 'type', '=', 'payment')]"
+                    invisible="hide_seller_fields"/>
+                <field name="contact_name" invisible="hide_company_fields" />
+            </field>
+            <field name="email" position="attributes">
+                <attribute name="string">Primary Email</attribute>
+            </field>
+            <field name="website" position="after">
+                <field name="additional_emails" widget="many2many_tags"/>
+            </field>
+
+            <field name="child_ids" position="replace">
+                <field name="child_ids" mode="kanban">
+                    <kanban>
+                        <field name="id"/>
+                        <field name="color"/>
+                        <field name="name"/>
+                        <field name="type"/>
+                        <field name="email"/>
+                        <field name="parent_id"/>
+                        <field name="is_company"/>
+                        <field name="function"/>
+                        <field name="phone"/>
+                        <field name="street"/>
+                        <field name="street2"/>
+                        <field name="zip"/>
+                        <field name="city"/>
+                        <field name="country_id"/>
+                        <field name="state_id"/>
+                        <field name="image_128"/>
+                        <field name="avatar_128"/>
+                        <field name="lang"/>
+                        <field name="comment"/>
+                        <field name="display_name"/>
+                        <templates>
+                            <t t-name="card" class="flex-row">
+                                <aside class="o_kanban_aside_full">
+                                    <field name="avatar_128" class="o_kanban_image_fill w-100" widget="image" options="{'img_class': 'object-fit-cover'}" alt="Contact image" invisible="type != 'contact'"/>
+                                    <field name="avatar_128" class="o_kanban_image_fill w-100" widget="image" options="{'img_class': 'object-fit-contain p-2'}" alt="Contact image" invisible="type == 'contact'"/>
+                                </aside>
+                                <main class="ps-2 ps-md-0">
+                                    <field name="name" invisible="not name" class="fw-bold"/>
+                                    <field name="type" invisible="name" class="fw-bold"/>
+                                    <div t-if="record.email.raw_value" class="text-truncate">
+                                        <i class="fa fa-fw me-1 fa-envelope text-primary" title="Email"/>
+                                        <field name="email"/>
+                                    </div>
+                                    <div t-if="record.phone.raw_value">
+                                        <i class="fa fa-fw me-1 fa-phone text-primary" title="Phone"/>
+                                        <field name="phone"/>
+                                    </div>
+                                    <div invisible="not function or is_company">
+                                        <i class="fa fa-fw me-1 fa-suitcase text-primary" title="Position"/>
+                                        <field name="function"/>
+                                    </div>
+                                    <div t-if="record.type.raw_value != 'contact' and (record.city.raw_value or record.country_id.raw_value)">
+                                        <i class="fa fa-fw me-1 fa-map-marker text-primary" title="Location"/>
+                                        <field name="city"/>
+                                        <span t-if="record.city.raw_value and record.country_id.raw_value">, </span>
+                                        <field name="country_id"/>
+                                    </div>
+                                </main>
+                            </t>
+                        </templates>
+                    </kanban>
+                    <form string="Contact / Address">
+                        <sheet>
+                            <field name="type" required="1" widget="radio" options="{'horizontal': true}"/>
+                            <field name="parent_id" invisible="1"/>
+                            <div class="text-muted oe_edit_only">
+                                <p class="mb-0" invisible="type != 'contact'">
+                                    <span>Use this to organize the contact details of employees of a given company (e.g. CEO, CFO, ...).</span>
+                                </p>
+                                <p class="mb-0" invisible="type != 'invoice'">
+                                    <span>Preferred address for all invoices. Selected by default when you invoice an order that belongs to this company.</span>
+                                </p>
+                                <p class="mb-0" invisible="type != 'delivery'">
+                                    <span>Preferred address for all deliveries. Selected by default when you deliver an order that belongs to this company.</span>
+                                </p>
+                                <p class="mb-0" invisible="type != 'other'">
+                                    <span>Other address for the company (e.g. subsidiary, ...)</span>
+                                </p>
+                            </div>
+                            <hr/>
+                            <group>
+                                <group>
+                                    <field name="name" string="Bank Name" required="type == 'bank'" invisible="type not in ['bank']" />
+                                    <field name="contact_name" string="Contact Name" required="type == 'bank'" invisible="type not in ['bank']" />
+                                    <field name="name" string="Contact Name" required="type == 'contact'" invisible="type in ['bank']" />
+                                    <field name="function" placeholder="e.g. Sales Director" invisible="type != 'contact'"/>
+                                    <label for="street" string="Address" invisible="type == 'contact'"/>
+                                    <div invisible="type == 'contact'">
+                                        <div class="o_address_format" name="div_address">
+                                            <field name="street" placeholder="Street..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Street 2..." class="o_address_street2"/>
+                                            <field name="city" placeholder="City" class="o_address_city"/>
+                                            <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True, 'no_quick_create': True}"/>
+                                            <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                            <field name="country_id" placeholder="Country" class="o_address_country" options="{&quot;no_open&quot;: True, &quot;no_create&quot;: True}"/>
+                                        </div>
+                                    </div>
+                                </group>
+                                <group>
+                                    <field name="email" widget="email"/>
+                                    <field name="phone" widget="phone"/>
+                                    <field name="verified_buyer" invisible="type not in ['bank']"/>
+                                    <field name="verified_date" readonly="1" invisible="type not in ['bank']" force_save="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="comment" placeholder="Internal notes..." nolabel="1" colspan="2"/>
+                            </group>
+                            <field name="lang" invisible="True"/>
+                            <field name="user_id" invisible="True"/>
+                        </sheet>
+                    </form>
+                </field>
+            </field>
+
+            <xpath expr="//div[div[@name='partner_address_country']]" position="after">
+                <field name="hide_seller_fields" invisible="1"/>
+                <field name="hide_rep_fields" invisible="1"/>
+                <field name="hide_buyer_fields" invisible="1"/>
+                <field name="hide_company_fields" invisible="1"/>
+                <field name="has_master_agreement" invisible="hide_seller_fields and hide_buyer_fields"/>
+                <field name="master_agreement_file" invisible="hide_buyer_fields" widget="file"/>
+                <field name="seller_master_agreement_file" invisible="hide_seller_fields" widget="file"/>
+                <field name="affidavit_verified" invisible="hide_seller_fields"/>
+                <field name="buyer_number_ids" widget="many2many_tags" invisible="hide_buyer_fields"/>
+            </xpath> 
+
+            <xpath expr="//group" position="after">
+                <div style="display: flex; gap: 5px 50px; flex-wrap: wrap;" invisible="hide_company_employee_fields">
+                    <field name="hide_company_employee_fields" invisible="1"/>
+                    <field name="hide_company_fields" invisible="1"/>
+                    <field name="hide_buyer_fields" invisible="1"/>
+                    <field name="hide_rep_fields" invisible="1"/>
+                    <field name="hide_seller_fields" invisible="1"/>
+                    <div style="display: flex; flex-direction: column;" invisible="hide_buyer_fields">
+                        <label for="buyer_name_display_preference" string="Buyer Name"/>
+                        <field name="buyer_name"/>
+                        <field name="buyer_name_display_preference" label="" widget="radio" options="{'horizontal': true}"/>
+                    </div>
+                    <div style="display: flex; flex-direction: column;" invisible="hide_rep_fields">
+                        <label for="rep_name_display_preference" string="Rep Name"/>
+                        <field name="rep_name"/>
+                        <field name="rep_name_display_preference" label="" widget="radio" options="{'horizontal': true}"/>
+                    </div>
+                    <div style="display: flex; flex-direction: column;" invisible="hide_seller_fields">
+                        <label for="seller_name_display_preference" string="Seller Name"/>
+                        <field name="seller_name"/>
+                        <field name="seller_name_display_preference" label="" widget="radio" options="{'horizontal': true}"/>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                </div>
+            </xpath>
+
+            
+            <xpath expr="//form/sheet/notebook" position="inside">
+                <field name="hide_buyer_fields" invisible="1"/>
+                <field name="hide_lien_holder_fields" invisible="1"/>
+                <field name="hide_rep_fields" invisible="1"/>
+                <field name="hide_seller_fields" invisible="1"/>
+                <page string="Lien Holders" name="lien_holders" invisible="hide_seller_fields" >
+                    <field name="lien_holder_ids" nolabel="1"  />
+                </page>
+                <page string="Reps" name="reps" invisible="hide_seller_fields" >
+                    <field name="rep_ids" >
+                        <list string="reps" editable="bottom">
+                            <field name="seller_id" column_invisible="True"/>
+                            <field name="contract_id" column_invisible="True"/>
+                            <field name="rep_id" options="{'no_create_edit': True, 'no_quick_create':true, 'no_create':true}"/>
+                            <field name="percentage_commission" sum="Total"/>
+                        </list>         
+                    </field>
+                </page>
+                <page string="Sellers" name="sellers" invisible="hide_rep_fields" >
+                    <field name="seller_ids" readonly="1">
+                        <list string="seller">
+                            <field name="seller_id"/>
+                            <field name="rep_id" column_invisible="True"/>
+                            <field name="percentage_commission"/>
+                        </list>         
+                    </field>   
+                </page>
+                <page string="Contracts as Seller" name="contracts_seller" invisible="hide_seller_fields" >
+                    <field name="contracts_as_seller" readonly="1" nolabel="1" >
+                        <list delete="0">
+                            <field name="id" widget="char" string="Contract #"/>
+                            <field name="sale_type"/>
+                            <field name="sold_price"/>
+                        </list>
+                    </field>
+                </page>
+                
+                <page string="Contracts LH" name="contracts_lh" invisible="hide_lien_holder_fields" >
+                    <field name="contracts_as_lien_holder" readonly="1" nolabel="1">
+                        <list delete="0">
+                            <field name="id" widget="char" string="Contract #"/>
+                            <field name="lien_holder_id" option='hide'/>
+                            <field name="sale_type"/>
+                            <field name="sold_price"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Payment Info" name="payment_info">
+                    <group>
+                        <group>
+                            <field name="discount" widget="percentage"/>
+                        </group>
+                    </group>
+                </page>
+                <page string="Contracts as Buyer" name="contracts_buyer" invisible="hide_buyer_fields" >
+                    <field name="contracts_as_buyer" readonly="1" nolabel="1">
+                        <list delete="0">
+                            <field name="id" widget="char" string="Contract #"/>
+                            <field name="buyer_id" option='hide'/>
+                            <field name="sale_type"/>
+                            <field name="sold_price"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Contracts as Rep" name="contracts_rep" invisible="hide_rep_fields" >
+                    <group string='Analytics'>
+                        <group>
+                            <field name="ltd_head_sold" readonly="1"/>
+                            <field name="ytd_head_sold" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="ltd_head_delivered" readonly="1"/>
+                            <field name="ytd_head_delivered" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string='YTD by Sale Type'>
+                        <field name="sale_type_stats_html" readonly="1" nolabel="1" colspan="2"/>
+                    </group>
+                    <field name="contracts_as_rep" readonly="1" nolabel="1">
+                        <list delete="0">
+                            <field name="id" widget="char" string="Contract #"/>
+                            <field name="sale_type"/>
+                            <field name="state"/>
+                            <field name="head1" optional="hide"/>
+                            <field name="head2" optional="hide"/>
+                            <field name="sold_date" optional="hide"/>
+                            <field name="sold_price"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Deliveries as Rep" name="deliveries_rep" invisible="hide_rep_fields" >
+                    <field name="deliveries_as_rep" readonly="1" nolabel="1">
+                        <list delete="0">
+                            <field name="name"/>
+                            <field name="delivery_date"/>
+                            <field name="head_count"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath> 
+        </field>
+    </record>
+</odoo>

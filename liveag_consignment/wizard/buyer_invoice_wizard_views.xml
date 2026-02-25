@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_buyer_invoice_wizard_form" model="ir.ui.view">
+        <field name="name">buyer.invoice.wizard.form</field>
+        <field name="model">buyer.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <style>
+                    .delivery_table td > .o_field_widget {
+                        margin-bottom: 0 !important;
+                    }
+                    .delivery_summary > .o_field_widget {
+                        margin-bottom: 0 !important;
+                    }
+                    .o_form_view .o_group .o_field_widget, .o_form_view .o_inner_group .o_field_widget {
+                        width: fit-content !important;
+                    }
+                    .delivery_table th {
+                        padding: 8px 0;
+                        text-align: center;
+                    }
+                    .delivery_table td {
+                        margin: 0 auto;
+                        padding: 3px 0;
+                        text-align: center;
+                        white-space: nowrap;
+                        width: fit-content;
+                    }
+                    .delivery_table td > .o_field_widget span {
+                        display: inline-block;
+                        text-align: center;
+                        width: fit-content;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tbody tr:not(.o_data_row) {
+                        display: none !important;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tbody tr.o_list_empty_row {
+                        display: none !important;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tfoot {
+                        display: none !important;
+                    }
+                </style>
+                <header>
+                    <h1><field name="delivery_id" readonly="1" invisible="1"/></h1>
+                </header>
+                <sheet>
+                    <field name="delivery_id" readonly="1" invisible="1"/>
+                    <field name="currency_id" readonly="1" invisible="1"/>
+                    <group>
+                        <group >
+                            <field name="buyer_id" string="Buyer" readonly="1"/>
+                            <field name="buyer_phone" string="Phone" readonly="1"/>
+                            <field name="buyer_email" string="Email" readonly="1"/>
+                        </group>
+                        <group >
+                            <field name="seller_name" readonly="1"/>
+                            <field name="seller_location" readonly="1"/>
+                            <field name="rep_names_list" readonly="1" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="delivery_date" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="auction_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Contract">
+                        <group colspan="3" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_avg_weight_stop" string="Weight Stop" readonly="1"/>
+                                <field name="contract_avg_weight_stop" readonly="1"/>
+                            </div>
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_slide_description" string="Slide" readonly="1"/>
+                                <field name="contract_slide_description" readonly="1"/>
+                            </div>
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_price" string="Sold Price" readonly="1"/>
+                                <field name="contract_price" widget="monetary" readonly="1"/>
+                            </div>
+                        </group>
+                        <field name="contract_lines" nolabel="1" readonly="1" colspan="2">
+                            <list create="false" edit="false" delete="false">
+                                <field name="head_count" readonly="1"/>
+                                <field name="kind" readonly="1"/>
+                                <field name="gross_weight" readonly="1" invisible="1"/>
+                                <field name="shrink" widget="integer" readonly="1"/>
+                                <field name="net_weight" readonly="1" invisible="1"/>
+                                <field name="avg_weight" readonly="1"/>
+                                <field name="price" readonly="1" widget="monetary"/>
+                                <field name="gross_amount" readonly="1" widget="monetary" invisible="1"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Delivery">
+                        <field name="delivery_lines" nolabel="1" readonly="1" colspan="2">
+                            <list create="false" edit="false" delete="false">
+                                <field name="head_count" readonly="1"/>
+                                <field name="description" string="Kind" readonly="1"/>
+                                <field name="gross_weight" string="Gross Weight" readonly="1"/>
+                                <field name="shrink_percentage" widget="integer" string="Shrink" readonly="1"/>
+                                <field name="display_weight" string="Net Weight" readonly="1"/>
+                                <field name="display_average_weight" string="Avg" readonly="1"/>
+                                <field name="price" readonly="1" widget="monetary"/>
+                                <field name="gross_amount" readonly="1" widget="monetary"/>
+                            </list>
+                        </field>
+                        <div class="delivery_summary" colspan="2" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; padding: 0 20px;">
+                            <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                                <label for="delivery_head_count" string="Head" readonly="1" />
+                                <field name="delivery_head_count" widget="integer" readonly="1" />
+                            </div>
+                            <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                                <label for="delivery_gross_amount" string="Gross Amount" readonly="1" />
+                                <field name="delivery_gross_amount" widget="monetary" readonly="1" />
+                            </div>
+                        </div>
+                    </group>
+                    <group string="Buyer Summary">
+                        <group>
+                            <field name="buyer_comments" string="Comments" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="buyer_part_payment" readonly="1" />
+                            <field name="freight_adjustment" readonly="1" />
+                            <field name="buyer_adjustment" readonly="1" />
+                            <div colspan="2" style="height: 1px; background-color: #497336;"></div>
+                            <field name="net_due" style="font-weight: 700;" readonly="1" />
+                        </group>
+                        <group colspan="2">
+                            <field name="buyer_adjustment_description" readonly="1" />
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                            <button name="action_generate_pdf" string="Print Invoice" type="object" class="btn-outline-primary" icon="fa-print"/>
+                            <button name="action_generate_and_email_pdf" string="Email Invoice" type="object" class="btn-primary" icon="fa-envelope"/>
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_buyer_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Buyer Invoice</field>
+        <field name="res_model">buyer.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_delivery_id': active_id}</field>
+    </record>
+</odoo>

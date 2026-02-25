@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_merge_deliveries_wizard_form" model="ir.ui.view">
+        <field name="name">merge.deliveries.wizard.form</field>
+        <field name="model">merge.deliveries.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select Deliveries to merge">
+                <group>
+                    <field name="base_delivery_id" readonly="1"/>
+                </group>
+                <field name="option_delivery_ids" nolabel="1">
+                    <list editable='top'
+                            decoration-warning="state== 'confirmed'"
+                            decoration-danger="state in ['delivered','canceled','merged']"
+                            decoration-success="state == 'draft'" >
+                        <field name="state" column_invisible="1"/>                
+                        <field name="to_be_merged" force_save="1"/>
+                        <field name="state"/>
+                        <field name="seller_id"/>
+                        <field name="lot_number"/>
+                        <field name="slide_type"/>
+                    </list>
+                </field> 
+                <footer>
+                    <button name="action_merge" string="Merge Selected Contracts" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

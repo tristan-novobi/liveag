@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="weight_stop_view_list" model="ir.ui.view">
+        <field name="name">weight.stop.view.list</field>
+        <field name="model">weight.stop</field>
+        <field name="arch" type="xml">
+            <list string="Weight Stop" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="value" widget="char"/>
+                <field name="icon"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="weight_stop_view_search" model="ir.ui.view">
+        <field name="name">weight.stop.view.search</field>
+        <field name="model">weight.stop</field>
+        <field name="arch" type="xml">
+            <search string="Weight Stop">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="weight_stop_action" model="ir.actions.act_window">
+        <field name="name">Weight Stops</field>
+        <field name="res_model">weight.stop</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Weight Stop found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

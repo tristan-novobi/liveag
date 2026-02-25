@@ -1,0 +1,13 @@
+.delivery_address {
+  display: flex;
+  width: 100%;
+}
+
+.delivery_address .delivery_address_city {
+  width: 65%;
+  padding-right: 10px;
+}
+
+.delivery_address .delivery_address_state {
+  width: 30%;
+}

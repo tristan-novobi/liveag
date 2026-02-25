@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="bangs_vaccinated_view_list" model="ir.ui.view">
+        <field name="name">bangs.vaccinated.view.list</field>
+        <field name="model">bangs.vaccinated</field>
+        <field name="arch" type="xml">
+            <list string="Bangs Vaccinated" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="icon"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="bangs_vaccinated_view_search" model="ir.ui.view">
+        <field name="name">bangs.vaccinated.view.search</field>
+        <field name="model">bangs.vaccinated</field>
+        <field name="arch" type="xml">
+            <search string="Bangs Vaccinated">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="bangs_vaccinated_action" model="ir.actions.act_window">
+        <field name="name">Bangs Vaccinated</field>
+        <field name="res_model">bangs.vaccinated</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

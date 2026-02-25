@@ -1,0 +1,1039 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+  <template id="report_header">
+    <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+    <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+    <table style="width: 100%; margin-bottom: 10px; border: 0 solid transparent;">
+      <tr>
+        <td style="width: 20%; vertical-align: top;">
+          <img alt="Logo" style="height:40px;" t-att-src="image_data_uri(company.logo)"
+            t-if="company.logo" />
+        </td>
+        <td style="width: 60%; text-align: center;">
+          <div style="margin: 0 10px;">
+            <h2 style="font-size: 16px; margin: 0;">
+              <t t-esc="report_title" />
+            </h2>
+            <h2 style="font-size: 16px; margin: 0;">
+              <t t-esc="auction.name" />
+            </h2>
+          </div>
+        </td>
+        <td style="width: 20%; vertical-align: top; text-align: right;">
+          <p style="margin: 0; font-size: 12px; font-weight: 700;">
+            <t t-esc="company.street" />
+            <t t-if="company.street2">,
+              <t t-esc="company.street2" />
+            </t><br />
+            <t t-esc="company.city" />,
+            <t t-esc="company.state_id.name" />
+            <t t-esc="company.zip" /><br />
+            <t t-esc="format_phone(company.phone)" /><br />
+          </p>
+        </td>
+      </tr>
+    </table>
+  </template>
+
+  <template id="contracts_table">
+    <table
+      style="page-break-inside: avoid; font-size: 10px; width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+      <div style="padding: 4px 0;" />
+      <thead>
+        <tr>
+          <th style="width: 8%;">Lot</th>
+          <th style="width: 8%;">Head 1</th>
+          <th style="width: 10%;">Kind 1</th>
+          <th style="width: 8%;">Weight 1</th>
+          <th style="width: 8%;">Price 1</th>
+          <th style="width: 8%;">Head 2</th>
+          <th style="width: 10%;">Kind 2</th>
+          <th style="width: 8%;">Weight 2</th>
+          <th style="width: 8%;">Price 2</th>
+          <th style="width: 10%;">Delivery</th>
+          <th style="width: 10%;">Part Payment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <t t-as="contract" t-foreach="sorted(contracts, key=lambda c: c['lot_number'] or '')">
+          <tr t-att-style="'background-color: %s' % ('#f9f9f9' if contract_index % 2 == 0 else 'white')">
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['lot_number']">
+                <t t-esc="contract['lot_number']" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['head1'] != 0">
+                <t t-esc="contract['head1']" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['kind1']">
+                <t t-esc="contract['kind1']" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['weight1'] != 0">
+                <t t-esc="int(contract['weight1'])" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['price1'] != 0">
+                <span t-esc="contract['price1']" 
+                      t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['head2'] != 0">
+                <t t-esc="contract['head2']" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['kind2']">
+                <t t-esc="contract['kind2']" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['weight2'] != 0">
+                <t t-esc="int(contract['weight2'])" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['price2'] != 0">
+                <span t-esc="contract['price2']" 
+                      t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: center;">
+              <t t-if="contract['delivery_date_start'] and contract['delivery_date_end']">
+                <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" /> - <t t-esc="contract['delivery_date_end'].strftime('%-m/%-d')" />
+              </t>
+              <t t-elif="contract['delivery_date_start']">
+                <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" />
+              </t>
+            </td>
+            <td style="white-space: nowrap; padding: 4px; text-align: right;">
+              <span t-esc="contract['part_payment']"
+                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+            </td>
+          </tr>
+        </t>
+        <!-- Totals -->
+        <tr style="padding-top: 10px; border-top: 1px solid #B4B4B4;">
+          <td colspan="11" style="text-align: right; padding: 6px 0;">
+            <span style="font-weight: 700; background: #D8D8D8; padding: 8px; white-space: nowrap;">
+              <span style="margin-right: 20px;">
+                Total Head Count:
+                <t t-esc="total_head" />
+              </span>
+              <span>
+                Total Part Payment:
+                <t t-esc="total_part_payment"
+                  t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+              </span>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </template>
+
+  <template id="report_buyers_final">
+    <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+    <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+    <style>
+      @media screen {
+        body {
+          background-color: #d9d9d9;
+          margin: 0;
+          padding: 20px 0;
+        }
+        .page {
+          max-width: 8.5in !important;
+          min-height: 11in;
+          margin: 0 auto !important;
+          background: white;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          padding: 0.5in !important;
+          box-sizing: border-box;
+        }
+        .article {
+          width: 100% !important;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+          margin: 0;
+          padding: 0;
+        }
+        .page {
+          max-width: none !important;
+          box-shadow: none;
+          margin: 0 !important;
+          padding: 0.5in !important;
+        }
+      }
+    </style>
+    <t t-as="auction" t-foreach="docs">
+      <t t-as="auction" t-foreach="docs">
+        <main class="page">
+          <div class="article" style="font-family: Poppins, sans-serif; color: #3D3D3D" t-att-data-oe-id="auction.id"
+            t-att-data-oe-model="'sale.auction'">
+            <table style="width: 100%; margin-bottom: 10px; border: 0 solid transparent;">
+              <tr>
+                <td style="width: 20%; vertical-align: top;">
+                  <img alt="Logo" style="height:40px;" t-att-src="image_data_uri(company.logo)"
+                    t-if="company.logo" />
+                </td>
+                <td style="width: 60%; text-align: center;">
+                  <div style="margin: 0 10px;">
+                    <h2 style="font-size: 16px; margin: 0;">
+                      Buyer's Final Report
+                    </h2>
+                    <h2 style="font-size: 16px; margin: 0;">
+                      <t t-esc="auction.name" />
+                    </h2>
+                  </div>
+                </td>
+                <td style="width: 20%; vertical-align: top; text-align: right;">
+                  <p style="margin: 0; font-size: 12px; font-weight: 700;">
+                    <t t-esc="company.street" />
+                    <t t-if="company.street2">,
+                      <t t-esc="company.street2" />
+                    </t><br />
+                    <t t-esc="company.city" />,
+                    <t t-esc="company.state_id.name" />
+                    <t t-esc="company.zip" /><br />
+                    <t t-esc="format_phone(company.phone)" /><br />
+                  </p>
+                </td>
+              </tr>
+            </table>
+            <!-- Buyers List -->
+            <t t-set="buyers_data" t-value="auction._get_buyers_final_data()" />
+            <t t-if="env.context.get('buyer_id')">
+              <t t-set="buyers_data" t-value="[b for b in buyers_data if b['buyer'].id == env.context['buyer_id']]" />
+            </t>
+            <t t-as="buyer_data" t-foreach="buyers_data">
+              <!-- Buyer Header -->
+              <div style="margin: 30px 0;">
+                <div style="page-break-inside: avoid;">
+                  <div style="border-bottom: 1px solid #B4B4B4; border-top: 1px solid #B4B4B4; padding: 8px;">
+                    <div style="font-size: 14px; font-weight: bold; text-align: left;">
+                      <t t-if="buyer_data['buyer'].buyer_name">
+                        <t t-esc="buyer_data['buyer'].buyer_name" />
+                      </t>
+                      <t t-else="">
+                        <t t-esc="buyer_data['buyer'].name" />
+                      </t>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 700; text-align: left; margin-top: 4px;">
+                      <t t-if="buyer_data['buyer'].email">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Email:
+                          <t t-esc="buyer_data['buyer'].email" />
+                        </span>
+                      </t>
+                      <t t-if="buyer_data['buyer'].phone">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Phone:
+                          <t t-esc="format_phone(buyer_data['buyer'].phone)" />
+                        </span>
+                      </t>
+                      <!-- <t t-if="buyer_data['buyer'].mobile">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Cell:
+                          <t t-esc="format_phone(buyer_data['buyer'].mobile)" />
+                        </span>
+                      </t> -->
+                    </div>
+                  </div>
+                  <div style="font-size: 12px;">
+                    <p style="margin: 0; padding: 4px 8px;" t-if="buyer_data['buyer'].contact_address_inline_clean">
+                      <t t-esc="buyer_data['buyer'].contact_address_inline_clean" />
+                    </p>
+                  </div>
+                </div>
+                <!-- Buyer's Purchases -->
+                <t t-call="liveag_consignment.contracts_table">
+                  <t t-set="contracts" t-value="buyer_data['contracts']"/>
+                  <t t-set="total_head" t-value="buyer_data['total_head']"/>
+                  <t t-set="total_part_payment" t-value="buyer_data['total_part_payment']"/>
+                </t>
+              </div>
+            </t>
+            <!-- I need to get the grand total head count and grand total part payment amount that was billed out here -->
+            <t t-set="grand_total_head_count" t-value="sum(buyer_data['total_head'] for buyer_data in buyers_data)" />
+            <t t-set="grand_total_part_payment" t-value="sum(buyer_data['total_part_payment'] for buyer_data in buyers_data)" />
+            <div style="text-align: right; margin-top: 30px; border-top: 1px solid #B4B4B4; border-bottom: 1px solid #B4B4B4; padding: 10px;">
+              <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                <span style="margin-right: 20px;">
+                  Grand Total Head Count:
+                  <t t-esc="grand_total_head_count" />
+                </span>
+                <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                  Grand Total Payments:
+                  <t t-esc="grand_total_part_payment" 
+                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                </span>
+              </span>
+            </div>
+          </div>
+        </main>
+      </t>
+    </t>
+  </template>
+
+  <template id="auction_report_buyer">
+    <t t-call="web.html_container">
+      <style>
+        @media screen {
+          body {
+            background-color: #d9d9d9;
+            margin: 0;
+            padding: 20px 0;
+          }
+          .page {
+            max-width: 8.5in !important;
+            min-height: 11in;
+            margin: 0 auto !important;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 0.5in !important;
+            box-sizing: border-box;
+          }
+          .article {
+            width: 100% !important;
+          }
+        }
+        @media print {
+          body {
+            background: white;
+            margin: 0;
+            padding: 0;
+          }
+          .page {
+            max-width: none !important;
+            box-shadow: none;
+            margin: 0 !important;
+            padding: 0.5in !important;
+          }
+        }
+      </style>
+      <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+      <t t-as="auction" t-foreach="docs">
+        <main class="page">
+          <div class="article" style="font-family: Poppins, sans-serif; color: #3D3D3D" t-att-data-oe-id="auction.id"
+            t-att-data-oe-model="'sale.auction'">
+            
+            <t t-call="liveag_consignment.report_header">
+              <t t-set="report_title" t-value="'Buyer Recap'"/>
+              <t t-set="auction" t-value="auction"/>
+            </t>
+
+            <!-- Buyers List -->
+            <t t-set="buyers_data" t-value="auction._get_buyers_final_data(env.context.get('buyer_id'))" />
+            <t t-as="buyer_data" t-foreach="buyers_data">
+              <!-- Buyer Header -->
+              <div style="margin: 30px 0;">
+                <!-- If date_from and date_to are used in the context, show it here -->
+                <span style="font-size: 12px; font-weight: 700; text-align: left;">
+                  <t t-if="env.context.get('date_from') or env.context.get('date_to')">
+                    <t t-set="date_from" t-value="env.context.get('date_from')" />
+                    <t t-set="date_to" t-value="env.context.get('date_to')" />
+                    
+                    <t t-if="date_from and date_to">
+                      <!-- Format date range: "February 1 - 28" or "February 1 - March 31" -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      
+                      <t t-if="from_date.month == to_date.month and from_date.year == to_date.year">
+                        <!-- Same month: "February 1 - 28" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%-d')" />
+                      </t>
+                      <t t-elif="from_date.year == to_date.year">
+                        <!-- Same year: "February 1 - March 31" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%B %-d')" />
+                      </t>
+                      <t t-else="">
+                        <!-- Different years: "Feb 1, 2024 - Mar 31, 2025" -->
+                        <t t-esc="from_date.strftime('%b %-d, %Y')" /> - <t t-esc="to_date.strftime('%b %-d, %Y')" />
+                      </t>
+                    </t>
+                    <t t-elif="date_from">
+                      <!-- Only from date -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      From <t t-esc="from_date.strftime('%B %-d, %Y')" />
+                    </t>
+                    <t t-elif="date_to">
+                      <!-- Only to date -->
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      Through <t t-esc="to_date.strftime('%B %-d, %Y')" />
+                    </t>
+                  </t>
+                </span>
+                <div style="page-break-inside: avoid;">
+                  <div style="border-bottom: 1px solid #B4B4B4; border-top: 1px solid #B4B4B4; padding: 8px;">
+                    <div style="font-size: 14px; font-weight: bold; text-align: left;">
+                      <t t-if="buyer_data['buyer'].buyer_name">
+                        <t t-esc="buyer_data['buyer'].buyer_name" />
+                      </t>
+                      <t t-else="">
+                        <t t-esc="buyer_data['buyer'].name" />
+                      </t>
+                      <t t-if="buyer_data['buyer_number']">
+                        , <t t-esc="buyer_data['buyer_number'].name" />
+                      </t>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 700; text-align: left; margin-top: 4px;">
+                      <t t-if="buyer_data['buyer'].email">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Email:
+                          <t t-esc="buyer_data['buyer'].email" />
+                        </span>
+                      </t>
+                      <t t-if="buyer_data['buyer'].phone">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Phone:
+                          <t t-esc="format_phone(buyer_data['buyer'].phone)" />
+                        </span>
+                      </t>
+                      <!-- <t t-if="buyer_data['buyer'].mobile">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Cell:
+                          <t t-esc="format_phone(buyer_data['buyer'].mobile)" />
+                        </span>
+                      </t> -->
+                    </div>
+                    <div style="font-size: 12px;">
+                      <p style="margin: 0;" t-if="buyer_data['buyer'].contact_address_inline_clean">
+                        <t t-esc="buyer_data['buyer'].contact_address_inline_clean" />
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Buyer's Purchases -->
+                <t t-call="liveag_consignment.contracts_table">
+                  <t t-set="contracts" t-value="buyer_data['contracts']"/>
+                  <t t-set="total_head" t-value="buyer_data['total_head']"/>
+                  <t t-set="total_part_payment" t-value="buyer_data['total_part_payment']"/>
+                </t>
+
+                
+              </div>
+            </t>
+            <t t-set="grand_total_head_count" t-value="sum(buyer_data['total_head'] for buyer_data in buyers_data)" />
+            <t t-set="grand_total_part_payment" t-value="sum(buyer_data['total_part_payment'] for buyer_data in buyers_data)" />
+            <div style="text-align: right; margin-top: 30px; border-top: 1px solid #B4B4B4; border-bottom: 1px solid #B4B4B4; padding: 10px;">
+              <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                <span style="margin-right: 20px;">
+                  Grand Total Head Count:
+                  <t t-esc="grand_total_head_count" />
+                </span>
+                <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                  Grand Total Payments:
+                  <t t-esc="grand_total_part_payment" 
+                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                </span>
+              </span>
+            </div>
+
+            <!-- Payment Instructions -->
+            <div style="margin-top: 30px;">
+              <p style="margin: 10px 0; font-size: 12px;">Please remit payment to: <b>LiveAg, LLC</b></p>
+              <table style="font-size: 12px; text-align: left; width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                <tr>
+                  <td style="width: 50%; vertical-align: top;">
+                    <b style="margin: 10px 0; font-size: 16px">ACH or Wiring Instructions</b>
+                    <p style="margin: 0;">Bank: <b>Huntington National Bank</b></p>
+                    <p style="margin: 0;">Address: <b>7 Easton Ave, Columbus, OH 43219</b></p>
+                    <p style="margin: 0;">Contact Name: <b>Brook Eisenmann</b></p>
+                    <p style="margin: 0;">Contact Number: <b>(216) 206-1205</b></p>
+                    <p style="margin: 0; margin-top: 10px;">Account Name: <b>LiveAg, LLC</b></p>
+                    <p style="margin: 0;">Account Number: <b>01894147042</b></p>
+                    <p style="margin: 0;">Routing Number: <b>044000024</b></p>
+                  </td>
+                  <td style="width: 50%; vertical-align: top;">
+                    <b style="margin: 10px 0; font-size: 16px">Overnight UPS and FedEx</b>
+                    <p style="margin: 0;"><b style="margin: 10px 0; font-size: 16px;">US Mail is NOT accepted</b></p>
+                    <p style="margin: 0;"><b>LiveAg, LLC</b></p>
+                    <p style="margin: 0;"><b>108 W Angeline St.</b></p>
+                    <p style="margin: 0;"><b>Groesbeck, TX 76642</b></p>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div>
+            <t t-if="env.context.get('print_with_contracts')">
+              <t t-foreach="buyers_data" t-as="buyer_data">
+                <div style="page-break-before: always;">
+                    <!-- Get all contracts at once -->
+                    <t t-set="lot_numbers" t-value="[c['lot_number'] for c in buyer_data['contracts']]"/>
+                    <t t-set="contracts" t-value="env['consignment.contract'].search([
+                      ('lot_number', 'in', lot_numbers),
+                      ('auction_id', '=', auction.id)
+                    ])"/>
+                    
+                    <t t-call="liveag_consignment.report_consignment_buyer_contract">
+                      <t t-set="docs" t-value="contracts"/>
+                    </t>
+                  
+                  <!-- Add page break if not the last buyer -->
+                  <t t-if="not buyer_last">
+                    <div style="page-break-before: always;"/>
+                  </t>
+                </div>
+              </t>
+            </t>
+          </div>
+        </main>
+      </t>
+    </t>
+  </template>
+
+  <template id="auction_report_seller">
+    <t t-call="web.html_container">
+      <style>
+        @media screen {
+          body {
+            background-color: #d9d9d9;
+            margin: 0;
+            padding: 20px 0;
+          }
+          .page {
+            max-width: 8.5in !important;
+            min-height: 11in;
+            margin: 0 auto !important;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 0.5in !important;
+            box-sizing: border-box;
+          }
+          .article {
+            width: 100% !important;
+          }
+        }
+        @media print {
+          body {
+            background: white;
+            margin: 0;
+            padding: 0;
+          }
+          .page {
+            max-width: none !important;
+            box-shadow: none;
+            margin: 0 !important;
+            padding: 0.5in !important;
+          }
+        }
+      </style>
+      <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+      <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+      <t t-as="auction" t-foreach="docs">
+        <main class="page">
+          <div class="article" style="font-family: Poppins, sans-serif; color: #3D3D3D" t-att-data-oe-id="auction.id"
+            t-att-data-oe-model="'sale.auction'">
+            <t t-call="liveag_consignment.report_header">
+              <t t-set="report_title" t-value="'Seller Recap'"/>
+              <t t-set="auction" t-value="auction"/>
+            </t>
+
+            <!-- Seller List -->
+            <t t-set="sellers_data" t-value="auction._get_sellers_recap_data(env.context.get('seller_id'))" />
+            <t t-as="seller_data" t-foreach="sellers_data">
+              <!-- Seller Header -->
+              <div style="margin-top: 15px;">
+              <!-- If date_from and date_to are used in the context, show it here -->
+                <span style="font-size: 12px; font-weight: 700; text-align: left;">
+                  <t t-if="env.context.get('date_from') or env.context.get('date_to')">
+                    <t t-set="date_from" t-value="env.context.get('date_from')" />
+                    <t t-set="date_to" t-value="env.context.get('date_to')" />
+                    
+                    <t t-if="date_from and date_to">
+                      <!-- Format date range: "February 1 - 28" or "February 1 - March 31" -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      
+                      <t t-if="from_date.month == to_date.month and from_date.year == to_date.year">
+                        <!-- Same month: "February 1 - 28" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%-d')" />
+                      </t>
+                      <t t-elif="from_date.year == to_date.year">
+                        <!-- Same year: "February 1 - March 31" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%B %-d')" />
+                      </t>
+                      <t t-else="">
+                        <!-- Different years: "Feb 1, 2024 - Mar 31, 2025" -->
+                        <t t-esc="from_date.strftime('%b %-d, %Y')" /> - <t t-esc="to_date.strftime('%b %-d, %Y')" />
+                      </t>
+                    </t>
+                    <t t-elif="date_from">
+                      <!-- Only from date -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      From <t t-esc="from_date.strftime('%B %-d, %Y')" />
+                    </t>
+                    <t t-elif="date_to">
+                      <!-- Only to date -->
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      Through <t t-esc="to_date.strftime('%B %-d, %Y')" />
+                    </t>
+                  </t>
+                </span>
+                <!-- Loop through lien holder groups -->
+                <t t-foreach="seller_data['lien_holder_groups']" t-as="lien_holder_group">
+                  <div style="margin-bottom: 15px;">
+                    <!-- Seller's Lots Table -->
+                    <div style="page-break-inside: auto;">
+                      <div style="text-align: left; padding: 4px 0 0 0; font-size: 12px;">
+                        <div style="page-break-inside: avoid; margin: 0;">
+                          <div style="border-top: 1px solid #B4B4B4; padding: 8px;">
+                            <div style="font-size: 14px; font-weight: bold; text-align: left;">
+                              <t t-if="seller_data['seller'].company_type == 'company'">
+                                <t t-esc="seller_data['seller'].name" />
+                              </t>
+                              <t t-elif="seller_data['seller'].seller_name">
+                                <t t-esc="seller_data['seller'].seller_name" />
+                              </t>
+                              <t t-else="">
+                                <t t-esc="seller_data['seller'].name" />
+                              </t>
+                            </div>
+                            <div style="font-size: 12px;">
+                              <p style="margin: 0; padding: 2px 0;" t-if="seller_data['seller'].contact_address_inline_clean">
+                                <t t-esc="seller_data['seller'].contact_address_inline_clean" />
+                              </p>
+                            </div>
+                            <div style="font-size: 10px; font-weight: 700; text-align: left;">
+                              <t t-if="seller_data['seller'].email">
+                                <span style="margin-right: 10px; text-wrap: nowrap;">Email:
+                                  <t t-esc="seller_data['seller'].email" />
+                                </span>
+                              </t>
+                              <t t-if="seller_data['seller'].phone">
+                                <span style="margin-right: 10px; text-wrap: nowrap;">Phone:
+                                  <t t-esc="format_phone(seller_data['seller'].phone)" />
+                                </span>
+                              </t>
+                              <!-- <t t-if="seller_data['seller'].mobile">
+                                <span style="margin-right: 10px; text-wrap: nowrap;">Cell:
+                                  <t t-esc="format_phone(seller_data['seller'].mobile)" />
+                                </span>
+                              </t> -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <table style="font-size: 10px; width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                        <thead>
+                          <!-- Repeated Seller & Lien Holder Info -->
+                          <tr>
+                            <th colspan="11" style="text-align: left; font-size: 14px; padding: 0;">
+                              <div style="margin: 0;">
+                                  <div t-if="lien_holder_group['lien_holder']" style="padding: 4px 8px; background-color: #e8e8e8; border-top: 1px solid #B4B4B4;">
+                                      <div style="float: left;">
+                                          <span style="font-weight: 400;">Lien Holder: </span>
+                                          <span style="font-weight: 700;"><t t-esc="lien_holder_group['lien_holder'].name"/></span>
+                                      </div>
+                                      <div style="float: right;">
+                                          <span style="font-weight: 400;">(
+                                              <t t-if="seller_data['seller'].company_type == 'company'">
+                                                  <t t-esc="seller_data['seller'].name"/>
+                                              </t>
+                                              <t t-elif="seller_data['seller'].seller_name">
+                                                  <t t-esc="seller_data['seller'].seller_name"/>
+                                              </t>
+                                              <t t-else="">
+                                                  <t t-esc="seller_data['seller'].name"/>
+                                              </t>
+                                          )</span>
+                                      </div>
+                                      <div style="clear: both;"></div>
+                                  </div>
+                              </div>
+                            </th>
+                          </tr>
+                          <!-- Column Headers -->
+                          <tr style="border-top: 1px solid #B4B4B4;">
+                            <th style="width: 8%; padding: 4px 0;">Lot</th>
+                            <th style="width: 8%; padding: 4px 0;">Head 1</th>
+                            <th style="width: 10%; padding: 4px 0;">Kind 1</th>
+                            <th style="width: 8%; padding: 4px 0;">Weight 1</th>
+                            <th style="width: 8%; padding: 4px 0;">Price 1</th>
+                            <th style="width: 8%; padding: 4px 0;">Head 2</th>
+                            <th style="width: 10%; padding: 4px 0;">Kind 2</th>
+                            <th style="width: 8%; padding: 4px 0;">Weight 2</th>
+                            <th style="width: 8%; padding: 4px 0;">Price 2</th>
+                            <th style="width: 10%; padding: 4px 0;">Delivery</th>
+                            <th style="width: 10%; padding: 4px 0; ">Part Payment</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <t t-foreach="lien_holder_group['contracts']" t-as="contract">
+                            <tr t-att-style="'background-color: %s' % ('#e8e8e8' if contract_index % 2 == 0 else 'white')">
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['lot_number']">
+                                  <t t-esc="contract['lot_number']" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['head1'] != 0">
+                                  <t t-esc="contract['head1']" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['kind1']">
+                                  <t t-esc="contract['kind1']" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['weight1'] != 0">
+                                  <t t-esc="int(contract['weight1'])" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['price1'] != 0">
+                                  <span t-esc="contract['price1']" 
+                                        t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['head2'] != 0">
+                                  <t t-esc="contract['head2']" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['kind2']">
+                                  <t t-esc="contract['kind2']" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['weight2'] != 0">
+                                  <t t-esc="int(contract['weight2'])" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract['price2'] != 0">
+                                  <span t-esc="contract['price2']" 
+                                        t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                                <t t-if="contract.get('delivery_date_start') and contract.get('delivery_date_end')">
+                                  <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" /> - <t t-esc="contract['delivery_date_end'].strftime('%-m/%-d')" />
+                                </t>
+                                <t t-elif="contract.get('delivery_date_start')">
+                                  <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" />
+                                </t>
+                              </td>
+                              <td style="white-space: nowrap; padding: 4px; text-align: right;">
+                                <span t-esc="contract['part_payment']"
+                                      t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                              </td>
+                            </tr>
+                          </t>
+                          <!-- Lien Holder Group Totals -->
+                          <tr style="padding-top: 10px; border-top: 1px solid #B4B4B4;">
+                            <td colspan="11" style="text-align: right; padding: 6px 0;">
+                              <span style="font-weight: 700; background: #D8D8D8; padding: 8px 8px; white-space: nowrap;">
+                                <span style="margin-right: 20px;">
+                                  Total Head Count:
+                                  <t t-esc="lien_holder_group['total_head']" />
+                                </span>
+                                <span>
+                                  Total Part Payment:
+                                  <t t-esc="lien_holder_group['total_part_payment']"
+                                      t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                                </span>
+                              </span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </t>
+              </div>
+            </t>
+            <!-- I need to get the grand total head count and grand total part payment amount that was billed out here -->
+            <t t-set="grand_total_head_count" t-value="sum(seller_data['total_head'] for seller_data in sellers_data)" />
+            <t t-set="grand_total_part_payment" t-value="sum(seller_data['total_part_payment'] for seller_data in sellers_data)" />
+            <div style="text-align: right; margin-top: 30px; border-top: 1px solid #B4B4B4; border-bottom: 1px solid #B4B4B4; padding: 10px;">
+              <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                <span style="margin-right: 20px;">
+                  Grand Total Head Count:
+                  <t t-esc="grand_total_head_count" />
+                </span>
+                <span style="font-weight: 700; padding: 8px 8px; white-space: nowrap;">
+                  Grand Total Payments:
+                  <t t-esc="grand_total_part_payment" 
+                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                </span>
+              </span>
+            </div>
+          </div>
+          <div>
+            <t t-if="env.context.get('print_with_contracts')">
+              <t t-as="seller_data" t-foreach="sellers_data">
+                <div style="page-break-before: always;">
+                  <!-- Collect all contracts from all lien holder groups -->
+                  <t t-set="all_lot_numbers" t-value="[]"/>
+                  <t t-foreach="seller_data['lien_holder_groups']" t-as="lien_holder_group">
+                    <t t-set="all_lot_numbers" t-value="all_lot_numbers + [c['lot_number'] for c in lien_holder_group['contracts']]"/>
+                  </t>
+                  
+                  <!-- Get all contracts at once -->
+                  <t t-set="contracts" t-value="env['consignment.contract'].search([
+                    ('lot_number', 'in', all_lot_numbers),
+                    ('auction_id', '=', auction.id)
+                  ])"/>
+                  
+                  <t t-call="liveag_consignment.report_consignment_seller_contract">
+                    <t t-set="docs" t-value="contracts"/>
+                  </t>
+                  
+                  <!-- Add page break if not the last seller -->
+                  <t t-if="not seller_last">
+                    <div style="page-break-before: always;"/>
+                  </t>
+                </div>
+              </t>
+            </t>
+          </div>
+        </main>
+      </t>
+    </t>
+  </template>
+
+  <template id="auction_report_rep">
+    <t t-call="web.html_container">
+      <style>
+        @media screen {
+          body {
+            background-color: #d9d9d9;
+            margin: 0;
+            padding: 20px 0;
+          }
+          .page {
+            max-width: 8.5in !important;
+            min-height: 11in;
+            margin: 0 auto !important;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 0.5in !important;
+            box-sizing: border-box;
+          }
+          .article {
+            width: 100% !important;
+          }
+        }
+        @media print {
+          body {
+            background: white;
+            margin: 0;
+            padding: 0;
+          }
+          .page {
+            max-width: none !important;
+            box-shadow: none;
+            margin: 0 !important;
+            padding: 0.5in !important;
+          }
+        }
+      </style>
+      <t t-set="company" t-value="env['res.company'].browse(env.user.company_id.id)" />
+      <t t-set="format_phone" t-value="env['consignment.contract'].format_phone" />
+      <t t-as="auction" t-foreach="docs">
+        <main class="page">
+          <div class="article" style="font-family: Poppins, sans-serif; color: #3D3D3D" t-att-data-oe-id="auction.id"
+            t-att-data-oe-model="'sale.auction'">
+            <!-- Rep List -->
+            <t t-set="reps_data" t-value="auction._get_rep_recap_data(env.context.get('rep_id'))" />
+            <t t-as="rep_data" t-foreach="reps_data">
+              <t t-call="liveag_consignment.report_header">
+                <t t-set="report_title" t-value="'Rep Recap'"/>
+                <t t-set="auction" t-value="auction"/>
+              </t>
+
+              <!-- Rep Header -->
+              <div style="margin: 30px 0;">
+              <!-- If date_from and date_to are used in the context, show it here -->
+                <span style="font-size: 12px; font-weight: 700; text-align: left;">
+                  <t t-if="env.context.get('date_from') or env.context.get('date_to')">
+                    <t t-set="date_from" t-value="env.context.get('date_from')" />
+                    <t t-set="date_to" t-value="env.context.get('date_to')" />
+                    
+                    <t t-if="date_from and date_to">
+                      <!-- Format date range: "February 1 - 28" or "February 1 - March 31" -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      
+                      <t t-if="from_date.month == to_date.month and from_date.year == to_date.year">
+                        <!-- Same month: "February 1 - 28" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%-d')" />
+                      </t>
+                      <t t-elif="from_date.year == to_date.year">
+                        <!-- Same year: "February 1 - March 31" -->
+                        <t t-esc="from_date.strftime('%B %-d')" /> - <t t-esc="to_date.strftime('%B %-d')" />
+                      </t>
+                      <t t-else="">
+                        <!-- Different years: "Feb 1, 2024 - Mar 31, 2025" -->
+                        <t t-esc="from_date.strftime('%b %-d, %Y')" /> - <t t-esc="to_date.strftime('%b %-d, %Y')" />
+                      </t>
+                    </t>
+                    <t t-elif="date_from">
+                      <!-- Only from date -->
+                      <t t-set="from_date" t-value="datetime.datetime.strptime(str(date_from), '%Y-%m-%d').date() if isinstance(date_from, str) else date_from" />
+                      From <t t-esc="from_date.strftime('%B %-d, %Y')" />
+                    </t>
+                    <t t-elif="date_to">
+                      <!-- Only to date -->
+                      <t t-set="to_date" t-value="datetime.datetime.strptime(str(date_to), '%Y-%m-%d').date() if isinstance(date_to, str) else date_to" />
+                      Through <t t-esc="to_date.strftime('%B %-d, %Y')" />
+                    </t>
+                  </t>
+                </span>
+                <div style="page-break-inside: avoid;">
+                  <div style="margin-bottom: 10px; border-bottom: 1px solid #B4B4B4; border-top: 1px solid #B4B4B4; padding: 8px;">
+                    <div style="font-size: 14px; font-weight: bold; text-align: left;">
+                      <t t-if="rep_data['rep'].rep_name">
+                        <t t-esc="rep_data['rep'].rep_name" />
+                      </t>
+                      <t t-else="">
+                        <t t-esc="rep_data['rep'].name" />
+                      </t>
+                    </div>
+                    <div style="font-size: 12px;">
+                      <p style="margin: 0; padding: 2px 0;" t-if="rep_data['rep'].contact_address_inline_clean">
+                        <t t-esc="rep_data['rep'].contact_address_inline_clean" />
+                      </p>
+                    </div>
+                    <div style="font-size: 10px; font-weight: 700; text-align: left; margin-top: 4px;">
+                      <t t-if="rep_data['rep'].email">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Email:
+                          <t t-esc="rep_data['rep'].email" />
+                        </span>
+                      </t>
+                      <t t-if="rep_data['rep'].phone">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Phone:
+                          <t t-esc="format_phone(rep_data['rep'].phone)" />
+                        </span>
+                      </t>
+                      <!-- <t t-if="rep_data['rep'].mobile">
+                        <span style="margin-right: 10px; text-wrap: nowrap;">Cell:
+                          <t t-esc="format_phone(rep_data['rep'].mobile)" />
+                        </span>
+                      </t> -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Rep's Lots -->
+                <div style="page-break-inside: auto;">
+                  <table style="font-size: 10px; width: 100%; border-collapse: collapse; border: 0 solid transparent;">
+                    <thead>
+                      <tr>
+                        <th style="width: 8%;">Lot</th>
+                        <th style="width: 8%;">Seller</th>
+                        <th style="width: 8%;">Buyer</th>
+                        <th style="width: 8%;">Head 1</th>
+                        <th style="width: 8%;">Price 1</th>
+                        <th style="width: 8%;">Head 2</th>
+                        <th style="width: 8%;">Price 2</th>
+                        <th style="width: 10%;">Delivery</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <t t-as="contract" t-foreach="sorted(rep_data['contracts'], key=lambda c: c['lot_number'] or '')">
+                        <tr t-att-style="'background-color: %s' % ('#f9f9f9' if contract_index % 2 == 0 else 'white')">
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['lot_number']">
+                              <t t-esc="contract['lot_number']" />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['seller']">
+                              <t t-esc="contract['seller']" />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['buyer']">
+                              <t t-esc="contract['buyer']" />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['head1']">
+                              <t t-esc="contract['head1']" />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['price']">
+                              <span t-esc="contract['price']" 
+                                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['head2']">
+                              <t t-esc="contract['head2']" />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['price2']">
+                              <span t-esc="contract['price2']" 
+                                    t-options='{"widget": "monetary", "display_currency": auction.company_id.currency_id, "precision": 2}' />
+                            </t>
+                          </td>
+                          <td style="white-space: nowrap; padding: 4px; text-align: center;">
+                            <t t-if="contract['delivery_date_start'] and contract['delivery_date_end']">
+                              <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" /> - <t t-esc="contract['delivery_date_end'].strftime('%-m/%-d')" />
+                            </t>
+                            <t t-elif="contract['delivery_date_start']">
+                              <t t-esc="contract['delivery_date_start'].strftime('%-m/%-d')" />
+                            </t>
+                          </td>
+                        </tr>
+                      </t>
+                    </tbody>
+                  </table>
+                  
+                  <!-- Totals in separate table -->
+                  <table style="width: 100%; font-size: 12px;">
+                    <tr style="border: 0 solid transparent; border-top: 1px solid #B4B4B4;">
+                      <td colspan="11" style="text-align: right; padding: 6px 0;">
+                        <span style="font-weight: 700; background: #D8D8D8; padding: 8px 8px; white-space: nowrap;">
+                          <span>
+                            Total Head Count:
+                            <t t-esc="rep_data['total_head']" />
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <p style="page-break-after: always;"/>
+            </t>
+          </div>
+          <div>
+            <t t-if="env.context.get('print_with_contracts')">
+              <t t-foreach="reps_data" t-as="rep_data">
+                <div style="page-break-before: always;">
+                    <t t-set="lot_numbers" t-value="[c['lot_number'] for c in rep_data['contracts']]"/>
+                    <t t-set="contracts" t-value="env['consignment.contract'].search([
+                      ('lot_number', 'in', lot_numbers),
+                      ('auction_id', '=', auction.id)
+                    ])"/>
+                    
+                    <t t-call="liveag_consignment.report_consignment_seller_contract">
+                      <t t-set="docs" t-value="contracts"/>
+                    </t>
+                  
+                  <t t-if="not rep_last">
+                    <div style="page-break-before: always;"/>
+                  </t>
+                </div>
+              </t>
+            </t>
+          </div>
+        </main>
+      </t>
+    </t>
+  </template>
+</odoo>

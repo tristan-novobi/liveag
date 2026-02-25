@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add menu item to portal navbar -->
+    <template id="portal_layout_consignment" name="Portal Layout Consignment" inherit_id="portal.portal_breadcrumbs">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'consignment'" class="breadcrumb-item">Consignment</li>
+        </xpath>
+    </template>
+
+    <!-- Add menu item to portal navbar that's always visible -->
+    <template id="portal_layout_consignment_menu" name="Portal Layout Consignment Menu" inherit_id="portal.portal_breadcrumbs">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'consignment'" class="breadcrumb-item">Consignment</li>
+        </xpath>
+    </template>
+
+    <!-- Add menu item to portal home page -->
+    <template id="portal_my_home_consignment" name="Portal My Home Consignment" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <div t-if="request.env.user.has_group('liveag_consignment.group_portal_consignment')" class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Consignment</h3>
+                        <a href="/my/consignment" class="btn btn-primary">View Consignment Contracts</a>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="portal_my_consignment" name="My Consignment">
+        <t t-call="portal.portal_layout">
+            <div class="o_portal_my_home">
+                <h3>My Consignment Contracts</h3>
+                <div t-if="contracts">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Contract ID</th>
+                                <th>Auction</th>
+                                <th>Contract Type</th>
+                                <th>Seller</th>
+                                <th>State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="contracts" t-as="contract">
+                                <td>CN <t t-esc="'%05d' % contract.id"/></td>
+                                <td><t t-esc="contract.auction_id.name"/></td>
+                                <td><t t-esc="contract.contract_type.name"/></td>
+                                <td><t t-esc="contract.seller_id.name"/></td>
+                                <td><t t-esc="contract.state"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div t-else="">
+                    <p>There are currently no consignment contracts.</p>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

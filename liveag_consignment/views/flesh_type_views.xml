@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="flesh_type_view_list" model="ir.ui.view">
+        <field name="name">flesh.type.view.list</field>
+        <field name="model">flesh.type</field>
+        <field name="arch" type="xml">
+            <list string="Flesh Type" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="flesh_type_view_search" model="ir.ui.view">
+        <field name="name">flesh.type.view.search</field>
+        <field name="model">flesh.type</field>
+        <field name="arch" type="xml">
+            <search string="Flesh Type">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="flesh_type_action" model="ir.actions.act_window">
+        <field name="name">Flesh Types</field>
+        <field name="res_model">flesh.type</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Flesh Type found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

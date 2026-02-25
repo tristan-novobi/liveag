@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="horns_list_view_list" model="ir.ui.view">
+        <field name="name">horns.list.view.list</field>
+        <field name="model">horns.list</field>
+        <field name="arch" type="xml">
+            <list string="Horns" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="horns_list_view_search" model="ir.ui.view">
+        <field name="name">horns.list.view.search</field>
+        <field name="model">horns.list</field>
+        <field name="arch" type="xml">
+            <search string="Horns">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="horns_list_action" model="ir.actions.act_window">
+        <field name="name">Horns</field>
+        <field name="res_model">horns.list</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

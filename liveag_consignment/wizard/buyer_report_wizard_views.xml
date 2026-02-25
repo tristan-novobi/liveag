@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_buyer_report_wizard_form" model="ir.ui.view">
+        <field name="name">buyer.report.wizard.form</field>
+        <field name="model">buyer.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select Buyer">
+                <group>
+                    <field name="auction_id" invisible="1"/>
+                    <field name="show_date_filter" invisible="1"/>
+                    <field name="available_buyer_ids" invisible="1"/>
+                    <field name="date_from" invisible="not show_date_filter"/>
+                    <field name="date_to" invisible="not show_date_filter"/>
+                    <field name="buyer_id" domain="[('id', 'in', available_buyer_ids)]"/>
+                    <field name="print_with_contracts" widget="boolean_toggle"/>
+                </group>
+                <footer>
+                    <button name="action_print_report" string="Print Report" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

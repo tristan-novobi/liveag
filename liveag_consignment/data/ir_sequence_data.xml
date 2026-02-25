@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seq_consignment_contract" model="ir.sequence">
+        <field name="name">Consignment Contract</field>
+        <field name="code">consignment.contract</field>
+        <field name="prefix">CN# </field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_consignment_delivery" model="ir.sequence">
+        <field name="name">Consignment Delivery</field>
+        <field name="code">consignment.delivery</field>
+        <field name="prefix">DEL# </field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

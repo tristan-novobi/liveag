@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_delivery_sheet_wizard_form" model="ir.ui.view">
+        <field name="name">delivery.sheet.wizard.form</field>
+        <field name="model">delivery.sheet.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <style>
+                    .delivery_table td > .o_field_widget {
+                        margin-bottom: 0 !important;
+                    }
+                    .delivery_summary > .o_field_widget {
+                        margin-bottom: 0 !important;
+                    }
+                    .o_form_view .o_group .o_field_widget, .o_form_view .o_inner_group .o_field_widget {
+                        width: fit-content !important;
+                    }
+                    .delivery_table th {
+                        padding: 8px 0;
+                        text-align: center;
+                    }
+                    .delivery_table td {
+                        margin: 0 auto;
+                        padding: 3px 0;
+                        text-align: center;
+                        white-space: nowrap;
+                        width: fit-content;
+                    }
+                    .delivery_table td > .o_field_widget span {
+                        display: inline-block;
+                        text-align: center;
+                        width: fit-content;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tbody tr:not(.o_data_row) {
+                        display: none !important;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tbody tr.o_list_empty_row {
+                        display: none !important;
+                    }
+                    .o_form_view .o_field_one2many .o_list_view tfoot {
+                        display: none !important;
+                    }
+                </style>
+                <header>
+                    <h1><field name="delivery_id" readonly="1" invisible="1"/></h1>
+                </header>
+                <sheet>
+                    <field name="delivery_id" readonly="1" invisible="1"/>
+                    <field name="currency_id" readonly="1" invisible="1"/>
+                    <span style="font-size: 18px; font-weight: 700;"><span style="margin-right: 5px">Lot:</span><field name="lot_number" style="margin: 0" readonly="1"/></span>
+                    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                        <span><strong style="margin-right: 5px">Seller:</strong><field name="seller_name" style="margin: 0" readonly="1"/></span>
+                        <div style="display: flex; align-items: center; justify-content: end; gap: 20px;">
+                            <span><strong style="margin-right: 5px">Auction Date:</strong><field name="auction_date" style="margin: 0" readonly="1"/></span>
+                            <span><strong style="margin-right: 5px">Delivery Date:</strong><field name="delivery_date" style="margin: 0" readonly="1"/></span>
+                        </div>
+                    </div>
+                    <group string="Contract">
+                        <group colspan="3" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_avg_weight_stop" string="Weight Stop" readonly="1"/>
+                                <field name="contract_avg_weight_stop" readonly="1"/>
+                            </div>
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_slide_description" string="Slide" readonly="1"/>
+                                <field name="contract_slide_description" readonly="1"/>
+                            </div>
+                            <div style="display: flex; flex-direction: row; align-items: center; width: 100%; justify-content: center; gap: 10px;">
+                                <label for="contract_price" string="Sold Price" readonly="1"/>
+                                <field name="contract_price" widget="monetary" readonly="1"/>
+                            </div>
+                        </group>
+                        <field name="contract_lines" nolabel="1" readonly="1" colspan="2">
+                            <list create="false" edit="false" delete="false">
+                                <field name="head_count" readonly="1"/>
+                                <field name="kind" readonly="1"/>
+                                <field name="gross_weight" readonly="1" invisible="1"/>
+                                <field name="shrink" widget="integer" readonly="1"/>
+                                <field name="net_weight" readonly="1" invisible="1"/>
+                                <field name="avg_weight" readonly="1"/>
+                                <field name="price" readonly="1" widget="monetary"/>
+                                <field name="gross_amount" readonly="1" widget="monetary" invisible="1"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Delivery">
+                        <field name="delivery_lines" nolabel="1" readonly="1" colspan="2">
+                            <list create="false" edit="false" delete="false">
+                                <field name="head_count" readonly="1"/>
+                                <field name="description" string="Kind" readonly="1"/>
+                                <field name="gross_weight" string="Gross Weight" readonly="1"/>
+                                <field name="shrink_percentage" widget="integer" string="Shrink" readonly="1"/>
+                                <field name="display_weight" string="Net Weight" readonly="1"/>
+                                <field name="display_average_weight" string="Avg" readonly="1"/>
+                                <field name="price" readonly="1" widget="monetary"/>
+                                <field name="gross_amount" readonly="1" widget="monetary"/>
+                            </list>
+                        </field>
+                        <div class="delivery_summary" colspan="2" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%; padding: 0 20px;">
+                            <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                                <label for="delivery_head_count" string="Head" readonly="1" />
+                                <field name="delivery_head_count" widget="integer" readonly="1" />
+                            </div>
+                            <div style="display: flex; flex-direction: row; justify-content: center; gap: 10px;">
+                                <label for="delivery_gross_amount" string="Gross Amount" readonly="1" />
+                                <field name="delivery_gross_amount" widget="monetary" readonly="1" />
+                            </div>
+                        </div>
+                    </group>
+                    <group string="Seller Deductions">
+                        <table colspan="2" class='w-100' style="border: 1px solid #e3e3e3; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #e3e3e3; font-weight: 700;">
+                                    <th style="text-align: left; padding: 10px;">Item</th>
+                                    <th style="text-align: right; padding: 10px;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span>Part Payment:</span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="seller_part_payment"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">Gross Commission:</span>
+                                        <span invisible="not is_gross_commission_per_head">(<field name="commission_rate" widget="monetary"/> /hd)</span>
+                                        <span invisible="is_gross_commission_per_head">(<field name="commission_rate"/>%)</span>
+                                        <field name="is_gross_commission_per_head" invisible="1"/>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="gross_commission"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">Consignment Fee:</span>
+                                        <span>(<field name="per_head_fee"/> /hd)</span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="per_head_commission"/>
+                                    </td>
+                                </tr>
+                                <tr style="background-color: #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px; font-weight: 700;">
+                                        <span  style="margin-right: 5px;">Total Commission:</span>
+                                        <field name="total_commission"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">National Beef Checkoff:</span>
+                                        <span>(<field name="national_beef_check_off_amount"/> /hd)</span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="national_beef_check_off" widget="monetary"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">State Beef Checkoff:</span>
+                                        <span>(<field name="beef_check_off_state_id" /> <field name="state_beef_check_off_amount"/> /hd)</span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="state_beef_check_off" widget="monetary"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">Freight Adjustment:</span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="freight_adjustment"/>
+                                    </td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e3e3e3;">
+                                    <td style="text-align: left; padding: 0 10px; border-right: 1px solid #e3e3e3;">
+                                        <span style="margin-right: 5px;">Other Deductions:</span>
+                                        <span><field name="other_deductions_description"/></span>
+                                    </td>
+                                    <td style="text-align: right; padding: 0 10px;">
+                                        <field name="other_deductions"/>
+                                    </td>
+                                </tr>
+                                <tr style="background-color: #e3e3e3; font-weight: 700;">
+                                    <td style="text-align: left; padding: 10px;">Total Deductions:</td>
+                                    <td style="text-align: right; padding: 10px;">
+                                        <field name="total_deductions"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div colspan="2" style="display: flex; flex-direction: row; justify-content: flex-end;">
+                            <div style="display: flex; flex-direction: row; align-items: center; gap: 10px; padding: 10px 20px; font-weight: 700; border: 1px solid #e3e3e3; background-color: #fafafa;">
+                                <span>Net Proceeds: </span>
+                                <field name="net_proceeds" style="margin-left: 10px; margin-bottom: 0;"/>
+                            </div>
+                        </div>
+                        <field name="check_ids" nolabel="1" readonly="1" colspan="2">
+                            <list create="false" edit="false" delete="false">
+                                <field name="check_number" string="Check #"/>
+                                <field name="payable_to" string="Payable to"/>
+                                <field name="check_amount" string="Amount" widget="monetary"/>
+                            </list>
+                        </field>
+                    </group>
+                    <group string="Buyer Summary">
+                        <group>
+                            <field name="buyer_name" readonly="1" />
+                            <field name="destination" readonly="1" />
+                            <field name="rep_names_list" readonly="1" widget="many2many_tags"/>
+                            <field name="buyer_comments" string="Comments" readonly="1" />
+                            <field name="buyer_adjustment_description" readonly="1" />
+                        </group>
+                        <group>
+                            <field name="buyer_part_payment" readonly="1" />
+                            <field name="freight_adjustment" readonly="1" />
+                            <field name="buyer_adjustment" readonly="1" />
+                            <div colspan="2" style="height: 1px; background-color: #497336;"></div>
+                            <field name="net_due" style="font-weight: 700;" readonly="1" />
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                        <div style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                            <button name="action_generate_pdf" string="Print Delivery Sheet" type="object" class="btn-outline-primary" icon="fa-print"/>
+                            <!-- <button name="action_generate_and_email_pdf" string="Email Invoice" type="object" class="btn-primary" icon="fa-envelope"/> -->
+                        </div>
+                    </div>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_delivery_sheet_wizard" model="ir.actions.act_window">
+        <field name="name">Generate Delivery Sheet</field>
+        <field name="res_model">delivery.sheet.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_delivery_id': active_id}</field>
+    </record>
+</odoo>

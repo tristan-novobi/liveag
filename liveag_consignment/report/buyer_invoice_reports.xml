@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="paperformat_delivery" model="report.paperformat">
+        <field name="name">Delivery Report</field>
+        <field name="default" eval="False" />
+        <field name="format">Letter</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">10</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_buyer_invoice" model="ir.actions.report">
+        <field name="name">Buyer Invoice</field>
+        <field name="model">consignment.delivery</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">liveag_consignment.buyer_invoice_report</field>
+        <field name="report_file">liveag_consignment.buyer_invoice_report</field>
+        <field name="print_report_name">'Lot %s - Buyer Invoice' % (object.lot_number or 'Unknown')</field>
+        <field name="binding_model_id" ref="model_consignment_delivery"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_delivery"/>
+    </record>
+
+    <record id="action_report_delivery_sheet" model="ir.actions.report">
+        <field name="name">Delivery Sheet</field>
+        <field name="model">consignment.delivery</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">liveag_consignment.delivery_sheet_report</field>
+        <field name="report_file">liveag_consignment.delivery_sheet_report</field>
+        <field name="print_report_name">'Lot %s - Delivery Sheet' % (object.lot_number or 'Unknown')</field>
+        <field name="binding_model_id" ref="model_consignment_delivery"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_delivery"/>
+    </record>
+</odoo>

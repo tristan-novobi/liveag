@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="whose_option_view_list" model="ir.ui.view">
+        <field name="name">whose.option.view.list</field>
+        <field name="model">whose.option</field>
+        <field name="arch" type="xml">
+            <list string="Whose Option" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="whose_option_view_search" model="ir.ui.view">
+        <field name="name">whose.option.view.search</field>
+        <field name="model">whose.option</field>
+        <field name="arch" type="xml">
+            <search string="Whose Option">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="whose_option_action" model="ir.actions.act_window">
+        <field name="name">Whose Options</field>
+        <field name="res_model">whose.option</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No record found. Let's create one!
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- list View -->
+        <record id="view_beef_checkoff_list" model="ir.ui.view">
+            <field name="name">beef.checkoff.list</field>
+            <field name="model">beef.checkoff</field>
+            <field name="arch" type="xml">
+                <list string="Beef Checkoff">
+                    <field name="state_code"/>
+                    <field name="national_beef_checkoff"/>
+                    <field name="state_beef_checkoff"/>
+                    <field name="other_state_fees"/>
+                    <field name="brand_inspector_national"/>
+                    <field name="brand_inspector_state"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- Form View -->
+        <record id="view_beef_checkoff_form" model="ir.ui.view">
+            <field name="name">beef.checkoff.form</field>
+            <field name="model">beef.checkoff</field>
+            <field name="arch" type="xml">
+                <form string="Beef Checkoff">
+                    <sheet>
+                        <group>
+                            <field name="state_code"/>
+                            <field name="national_beef_checkoff"/>
+                            <field name="state_beef_checkoff"/>
+                            <field name="other_state_fees"/>
+                            <field name="description"/>
+                            <field name="brand_inspector_national"/>
+                            <field name="brand_inspector_state"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Search View -->
+        <record id="view_beef_checkoff_search" model="ir.ui.view">
+            <field name="name">beef.checkoff.search</field>
+            <field name="model">beef.checkoff</field>
+            <field name="arch" type="xml">
+                <search string="Beef Checkoff">
+                    <field name="state_code"/>
+                    <field name="description"/>
+                    <filter string="Has National Checkoff" name="has_national" domain="[('national_beef_checkoff', '>', 0)]"/>
+                    <filter string="Has State Checkoff" name="has_state" domain="[('state_beef_checkoff', '>', 0)]"/>
+                    <filter string="Has Brand Inspector" name="has_brand_inspector" domain="['|', ('brand_inspector_national', '>', 0), ('brand_inspector_state', '>', 0)]"/>
+                </search>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_beef_checkoff" model="ir.actions.act_window">
+            <field name="name">Beef Checkoff</field>
+            <field name="res_model">beef.checkoff</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="view_beef_checkoff_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new Beef Checkoff record
+                </p>
+                <p>
+                    Manage beef checkoff fees by state.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Item -->
+        <menuitem id="menu_beef_checkoff"
+                  name="Beef Checkoff"
+                  action="action_beef_checkoff"
+                  parent="liveag_consignment.menu_consignment_config"
+                  sequence="25"/>
+    </data>
+</odoo>
